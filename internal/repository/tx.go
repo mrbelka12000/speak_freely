@@ -7,7 +7,7 @@ import (
 )
 
 type (
-	Tx struct {
+	tx struct {
 		db *sql.DB
 	}
 
@@ -18,11 +18,11 @@ const (
 	key txKey = "transaction_key"
 )
 
-func NewTx(db *sql.DB) *Tx {
-	return &Tx{db: db}
+func newTx(db *sql.DB) *tx {
+	return &tx{db: db}
 }
 
-func (t *Tx) Begin(ctx context.Context) (context.Context, error) {
+func (t *tx) Begin(ctx context.Context) (context.Context, error) {
 	tx, err := t.db.Begin()
 	if err != nil {
 		return nil, fmt.Errorf("begin transaction: %w", err)
@@ -31,7 +31,7 @@ func (t *Tx) Begin(ctx context.Context) (context.Context, error) {
 	return context.WithValue(ctx, key, tx), nil
 }
 
-func (t *Tx) Commit(ctx context.Context) error {
+func (t *tx) Commit(ctx context.Context) error {
 	tx, err := getTxFromContext(ctx)
 	if err != nil {
 		return fmt.Errorf("get transaction from context: %w", err)
@@ -40,7 +40,7 @@ func (t *Tx) Commit(ctx context.Context) error {
 	return tx.Commit()
 }
 
-func (t *Tx) Rollback(ctx context.Context) error {
+func (t *tx) Rollback(ctx context.Context) error {
 	tx, err := getTxFromContext(ctx)
 	if err != nil {
 		return fmt.Errorf("get transaction from context: %w", err)

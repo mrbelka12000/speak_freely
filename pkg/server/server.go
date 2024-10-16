@@ -3,6 +3,8 @@ package server
 import (
 	"context"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 type Server struct {
@@ -10,7 +12,7 @@ type Server struct {
 	cl chan error
 }
 
-func New(mux *http.ServeMux, port string) *Server {
+func New(mux *mux.Router, port string) *Server {
 	return &Server{
 		s: &http.Server{
 			Addr:    ":" + port,

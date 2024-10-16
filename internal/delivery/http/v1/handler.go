@@ -5,6 +5,8 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/gorilla/mux"
+
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/usecase"
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/validate"
 )
@@ -24,8 +26,9 @@ func New(uc *usecase.UseCase, v *validate.Validator) Handler {
 	}
 }
 
-func (h *Handler) InitRoutes(mux *http.ServeMux) {
-	mux.HandleFunc("/register", h.CreateUser)
+func (h *Handler) InitRoutes(r *mux.Router) {
+	r.HandleFunc("/register", h.CreateUser)
+	r.HandleFunc("/login", h.LoginUser)
 }
 
 func (h *Handler) writeBadRequest(w http.ResponseWriter, err error) {

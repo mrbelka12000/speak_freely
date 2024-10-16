@@ -26,14 +26,16 @@ func (u *user) Create(ctx context.Context, user models.UserCU) (id int64, err er
 			nickname,
 			email,
 			password,
-			auth_method) 
+			auth_method,
+			created_at) 
 		VALUES(
 			$1,
 			$2,
 			$3,
 			$4,
 			$5,
-			$6
+			$6,
+		 	$7
 		) RETURNING id`,
 		*user.FirstName,
 		*user.LastName,
@@ -41,6 +43,7 @@ func (u *user) Create(ctx context.Context, user models.UserCU) (id int64, err er
 		*user.Email,
 		*user.Password,
 		*user.AuthMethod,
+		user.CreatedAt,
 	).Scan(&id)
 	if err != nil {
 		return 0, fmt.Errorf("create user: %w", err)
@@ -56,7 +59,9 @@ SELECT
     first_name, 
     last_name, 
     nickname, 
-    email, auth_method
+    email, 
+    auth_method,
+    created_at
 FROM users
 WHERE id = $1`,
 		id).Scan(
@@ -66,6 +71,7 @@ WHERE id = $1`,
 		&user.Nickname,
 		&user.Email,
 		&user.AuthMethod,
+		&user.CreatedAt,
 	)
 	if err != nil {
 		return user, fmt.Errorf("get user: %w", err)
@@ -81,12 +87,12 @@ SELECT
     first_name, 
     last_name, 
     nickname, 
-    email, auth_method
+    email, 
+    auth_method
 FROM users
 WHERE
 `
 	var args []any
-
 	if pars.ID != nil {
 		args = append(args, *pars.ID)
 		query += fmt.Sprintf(" id = $%v AND", len(args))
@@ -134,6 +140,7 @@ WHERE
 		if err != nil {
 			return nil, 0, fmt.Errorf("scan user: %w", err)
 		}
+		users = append(users, user)
 	}
 
 	err = rows.Err()
@@ -192,4 +199,34 @@ func (u *user) Delete(ctx context.Context, id int64) error {
 	}
 
 	return nil
+}
+
+func (u *user) FindByLogin(ctx context.Context, login string) (out models.User, err error) {
+	err = QueryRow(ctx, u.db, `
+SELECT 
+    id, 
+    first_name, 
+    last_name, 
+    nickname, 
+    email, 
+    auth_method,
+    created_at,
+    password
+FROM users
+WHERE nickname = $1 OR email = $1`,
+		login).Scan(
+		&out.ID,
+		&out.FirstName,
+		&out.LastName,
+		&out.Nickname,
+		&out.Email,
+		&out.AuthMethod,
+		&out.CreatedAt,
+		&out.Password,
+	)
+	if err != nil {
+		return out, fmt.Errorf("get user: %w", err)
+	}
+
+	return out, nil
 }

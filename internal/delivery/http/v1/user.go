@@ -16,7 +16,7 @@ func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	missed, err := h.v.ValidateUser(r.Context(), obj, true)
+	missed, err := h.v.ValidateUser(r.Context(), obj, -1)
 	if err != nil {
 		h.writeInternalServerError(w, err)
 		return
@@ -47,4 +47,15 @@ func (h *Handler) LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	id, err := h.uc.UserLogin(r.Context(), obj)
+	if err != nil {
+		h.writeBadRequest(w, err)
+		return
+	}
+
+	writeJson(w, struct {
+		ID int64 `json:"id"`
+	}{
+		ID: id,
+	}, http.StatusOK)
 }

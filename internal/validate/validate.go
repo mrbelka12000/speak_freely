@@ -78,7 +78,6 @@ func (v *Validator) ValidateUser(ctx context.Context, user models.UserCU, id int
 
 		if utf8.RuneCountInString(*user.Email) > 100 {
 			mp["email"] = RequiredField{
-
 				Description: ErrEmailTooLong.Error(),
 			}
 		}
@@ -163,13 +162,17 @@ func (v *Validator) ValidateUser(ctx context.Context, user models.UserCU, id int
 	return mp, nil
 }
 
-func validatePassword(password string) (errs error) {
+func validatePassword(password string) (err error) {
 	var (
 		anyNum    bool
 		anyLetter bool
 	)
 
 	for _, c := range password {
+		if unicode.IsSymbol(c) || unicode.IsPunct(c) || unicode.IsSpace(c) {
+			return ErrInvalidPassword
+		}
+
 		if unicode.IsLetter(c) {
 			anyLetter = true
 		}

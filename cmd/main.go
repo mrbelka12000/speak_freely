@@ -2,8 +2,9 @@ package main
 
 import (
 	"log/slog"
-	"net/http"
 	"os"
+
+	"github.com/gorilla/mux"
 
 	handler "github.com/mrbelka12000/linguo_sphere_backend/internal/delivery/http/v1"
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/repository"
@@ -11,6 +12,7 @@ import (
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/usecase"
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/validate"
 	"github.com/mrbelka12000/linguo_sphere_backend/pkg/config"
+	"github.com/mrbelka12000/linguo_sphere_backend/pkg/database"
 	"github.com/mrbelka12000/linguo_sphere_backend/pkg/server"
 )
 
@@ -23,18 +25,24 @@ func main() {
 
 	log := slog.New(slog.NewJSONHandler(os.Stdout, nil)).With("service_name", cfg.ServiceName)
 
-	repo := repository.New(nil)
-	txBuilder := repository.NewTx(nil)
+	db, err := database.Connect(cfg)
+	if err != nil {
+		log.With("error", err).Error("failed to connect to database")
+		return
+	}
+	defer db.Close()
+
+	repo := repository.New(db)
 	srv := service.New(repo)
-	uc := usecase.New(srv, txBuilder)
-
+	uc := usecase.New(srv, repo.Tx)
 	h := handler.New(uc, validate.New(repo.User))
-	mux := http.NewServeMux()
-	h.InitRoutes(mux)
+	r := mux.NewRouter()
+	h.InitRoutes(r)
 
-	s := server.New(mux, cfg.HTTPPort)
+	s := server.New(r, cfg.HTTPPort)
 	s.Start()
-	log.With("Port", cfg.HTTPPort).Info("Starting HTTP server")
+
+	log.With("port", cfg.HTTPPort).Info("Starting HTTP server")
 	err = <-s.Ch()
 	log.Error("Shutting down", err)
 }
