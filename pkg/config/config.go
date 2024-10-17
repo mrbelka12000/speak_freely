@@ -11,11 +11,11 @@ import (
 type Config struct {
 	PGURL          string `env:"PG_URL,required"`
 	MigrationsPath string `env:"MIGRATIONS_PATH, default=migrations/"`
-	ServiceName    string `env:"SERVICE_NAME,required"`
 	UseMigrates    bool   `env:"USE_MIGRATES,default=false"`
+	ServiceName    string `env:"SERVICE_NAME,required"`
 	HTTPPort       string `env:"HTTP_PORT, default=8081"`
-	AssemblyKey    string `env:"ASSEMBLY_KEY"`
-	AIToken        string `env:"AI_TOKEN"`
+	AssemblyKey    string `env:"ASSEMBLY_KEY,required"`
+	AIToken        string `env:"AI_TOKEN,required"`
 }
 
 func Get() (Config, error) {

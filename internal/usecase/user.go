@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/models"
+	"github.com/mrbelka12000/linguo_sphere_backend/internal/validate"
 )
 
 func (uc *UseCase) UserCreate(ctx context.Context, user models.UserCU) (int64, error) {
@@ -28,4 +29,8 @@ func (uc *UseCase) UserDelete(ctx context.Context, id int64) error {
 
 func (uc *UseCase) UserLogin(ctx context.Context, obj models.UserLogin) (int64, error) {
 	return uc.srv.User.Login(ctx, obj)
+}
+
+func (uc *UseCase) UserCUValidate(ctx context.Context, user models.UserCU, id int64) (map[string]validate.RequiredField, error) {
+	return uc.validator.ValidateUser(ctx, user, id)
 }

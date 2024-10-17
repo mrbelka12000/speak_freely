@@ -7,7 +7,7 @@ import (
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/models"
 )
 
-func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) Registration(w http.ResponseWriter, r *http.Request) {
 	var obj models.UserCU
 
 	err := json.NewDecoder(r.Body).Decode(&obj)
@@ -16,7 +16,7 @@ func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	missed, err := h.v.ValidateUser(r.Context(), obj, -1)
+	missed, err := h.uc.UserCUValidate(r.Context(), obj, -1)
 	if err != nil {
 		h.writeInternalServerError(w, err)
 		return
@@ -39,7 +39,7 @@ func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}, http.StatusCreated)
 }
 
-func (h *Handler) LoginUser(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	var obj models.UserLogin
 	err := json.NewDecoder(r.Body).Decode(&obj)
 	if err != nil {

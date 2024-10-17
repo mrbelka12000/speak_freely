@@ -1,8 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"log/slog"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/gorilla/mux"
 
@@ -34,15 +37,26 @@ func main() {
 
 	repo := repository.New(db)
 	srv := service.New(repo)
-	uc := usecase.New(srv, repo.Tx)
-	h := handler.New(uc, validate.New(repo.User))
+	uc := usecase.New(srv, repo.Tx, validate.New(repo.User))
+	h := handler.New(uc)
 	r := mux.NewRouter()
 	h.InitRoutes(r)
 
 	s := server.New(r, cfg.HTTPPort)
-	s.Start()
 
 	log.With("port", cfg.HTTPPort).Info("Starting HTTP server")
-	err = <-s.Ch()
-	log.Error("Shutting down", err)
+	s.Start() // non blocking
+
+	gs := make(chan os.Signal, 1)
+	signal.Notify(gs, syscall.SIGINT, syscall.SIGTERM)
+
+	select {
+	case sig := <-gs:
+		log.Info(fmt.Sprintf("Received signal: %d", sig))
+		log.Info("Server stopped properly")
+		s.Stop()
+		close(gs)
+	case err := <-s.Ch():
+		log.With("error", err).Error("Server stopped")
+	}
 }

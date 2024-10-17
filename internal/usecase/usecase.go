@@ -4,12 +4,14 @@ import (
 	"context"
 
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/service"
+	"github.com/mrbelka12000/linguo_sphere_backend/internal/validate"
 )
 
 type (
 	UseCase struct {
-		srv *service.Service
-		tx  txBuilder
+		srv       *service.Service
+		tx        txBuilder
+		validator *validate.Validator
 	}
 
 	txBuilder interface {
@@ -19,9 +21,10 @@ type (
 	}
 )
 
-func New(srv *service.Service, tx txBuilder) *UseCase {
+func New(srv *service.Service, tx txBuilder, v *validate.Validator) *UseCase {
 	return &UseCase{
-		srv: srv,
-		tx:  tx,
+		srv:       srv,
+		tx:        tx,
+		validator: v,
 	}
 }

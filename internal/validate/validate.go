@@ -15,7 +15,7 @@ type (
 	}
 
 	RequiredField struct {
-		//ErrorCode   string
+		ErrorCode   string
 		Description string
 	}
 )

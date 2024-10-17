@@ -26,6 +26,7 @@ type (
 	}
 )
 
+// New builder of user service
 func New(r repo) *Service {
 	return &Service{
 		r:          r,
@@ -33,6 +34,7 @@ func New(r repo) *Service {
 	}
 }
 
+// Create new user
 func (s *Service) Create(ctx context.Context, user models.UserCU) (int64, error) {
 	user.CreatedAt = time.Now().Unix()
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(*user.Password), s.bcryptCost)
@@ -44,14 +46,17 @@ func (s *Service) Create(ctx context.Context, user models.UserCU) (int64, error)
 	return s.r.Create(ctx, user)
 }
 
+// Get by id
 func (s *Service) Get(ctx context.Context, id int64) (models.User, error) {
 	return s.r.Get(ctx, id)
 }
 
+// Update user data
 func (s *Service) Update(ctx context.Context, id int64, user models.UserCU) error {
 	return s.r.Update(ctx, id, user)
 }
 
+// List
 func (s *Service) List(ctx context.Context, pars models.UserPars) ([]models.User, int, error) {
 	return s.r.List(ctx, pars)
 }
