@@ -16,6 +16,10 @@ type Config struct {
 	HTTPPort       string `env:"HTTP_PORT, default=8081"`
 	AssemblyKey    string `env:"ASSEMBLY_KEY,required"`
 	AIToken        string `env:"AI_TOKEN,required"`
+	SMTPHost       string `env:"SMTP_HOST, default=smtp.gmail.com"`
+	SMTPPort       int    `env:"SMTP_PORT, default=587"`
+	SenderEmail    string `env:"SENDER_EMAIL,required"`
+	SMTPPassword   string `env:"SENDER_PASSWORD,required"`
 }
 
 func Get() (Config, error) {

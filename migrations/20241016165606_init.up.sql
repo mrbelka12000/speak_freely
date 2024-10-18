@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS users(
     email VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(200) NOT NULL,
     auth_method INTEGER DEFAULT 1,
+    confirmed BOOLEAN DEFAULT FALSE,
     created_at BIGINT NOT NULL
 );
 
