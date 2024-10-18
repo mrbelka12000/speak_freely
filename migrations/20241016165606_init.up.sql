@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS users(
     password VARCHAR(200) NOT NULL,
     auth_method INTEGER DEFAULT 1,
     confirmed BOOLEAN DEFAULT FALSE,
+    first_language VARCHAR(3) NOT NULL,
     created_at BIGINT NOT NULL
 );
 

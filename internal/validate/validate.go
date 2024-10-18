@@ -173,6 +173,25 @@ func (v *Validator) ValidateUser(ctx context.Context, user models.UserCU, id int
 		}
 	}
 
+	if user.FirstLanguage == nil && id == -1 {
+		mp["first_language"] = RequiredField{
+			Description: ErrMissingFirstLanguage.Error(),
+		}
+	}
+
+	if user.FirstLanguage != nil {
+		if *user.FirstLanguage == "" {
+			mp["first_language"] = RequiredField{
+				Description: ErrMissingFirstLanguage.Error(),
+			}
+		}
+		if utf8.RuneCountInString(*user.FirstLanguage) > 3 {
+			mp["first_language"] = RequiredField{
+				Description: ErrFirstLanguageTooLong.Error(),
+			}
+		}
+	}
+
 	return mp, nil
 }
 

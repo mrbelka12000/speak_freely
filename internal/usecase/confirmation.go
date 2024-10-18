@@ -28,6 +28,8 @@ func (uc *UseCase) UserConfirm(ctx context.Context, code string) error {
 	}
 
 	uc.cache.Delete(code)
+	uc.log.Info(fmt.Sprintf("user successfully confirmed: %d", id))
+
 	return nil
 }
 

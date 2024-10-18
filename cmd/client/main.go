@@ -12,12 +12,13 @@ import (
 
 func main() {
 	obj := models.UserCU{
-		FirstName:  getStrPointer("bekabekabekabekabekabekabekabekabekabeka"),
-		LastName:   getStrPointer("teka"),
-		Nickname:   getStrPointer("beka"),
-		Email:      getStrPointer("karshyga.beknur@gmail.com"),
-		Password:   getStrPointer("1111b"),
-		AuthMethod: getIntPointer(1),
+		FirstName:     getStrPointer("bekabekabekabekabekabekabekabekabekabeka"),
+		LastName:      getStrPointer("teka"),
+		Nickname:      getStrPointer("beka"),
+		Email:         getStrPointer("karshyga.beknur@gmail.com"),
+		Password:      getStrPointer("1111b"),
+		AuthMethod:    getIntPointer(1),
+		FirstLanguage: getStrPointer("en"),
 	}
 
 	body, _ := json.Marshal(&obj)

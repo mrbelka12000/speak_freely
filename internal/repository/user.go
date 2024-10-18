@@ -28,7 +28,9 @@ func (u *user) Create(ctx context.Context, user models.UserCU) (id int64, err er
 			email,
 			password,
 			auth_method,
-			created_at) 
+			first_language,
+			created_at
+			) 
 		VALUES(
 			$1,
 			$2,
@@ -36,7 +38,8 @@ func (u *user) Create(ctx context.Context, user models.UserCU) (id int64, err er
 			$4,
 			$5,
 			$6,
-		 	$7
+		 	$7,
+		    $8
 		) RETURNING id`,
 		*user.FirstName,
 		*user.LastName,
@@ -44,6 +47,7 @@ func (u *user) Create(ctx context.Context, user models.UserCU) (id int64, err er
 		*user.Email,
 		*user.Password,
 		*user.AuthMethod,
+		*user.FirstLanguage,
 		user.CreatedAt,
 	).Scan(&id)
 	if err != nil {
@@ -63,7 +67,9 @@ SELECT
     nickname, 
     email, 
     auth_method,
-    created_at
+    created_at,
+    first_language,
+	confirmed
 FROM users
 WHERE id = $1`,
 		id).Scan(
@@ -74,6 +80,7 @@ WHERE id = $1`,
 		&user.Email,
 		&user.AuthMethod,
 		&user.CreatedAt,
+		&user.FirstLanguage,
 	)
 	if err != nil {
 		return user, fmt.Errorf("get user: %w", err)
@@ -84,46 +91,65 @@ WHERE id = $1`,
 
 // List
 func (u *user) List(ctx context.Context, pars models.UserPars) ([]models.User, int, error) {
-	query := `
-SELECT 
-    id, 
+	querySelect := `
+   SELECT id, 
     first_name, 
     last_name, 
     nickname, 
     email, 
-    auth_method
-FROM users
-WHERE
+    auth_method,
+	created_at,
+	first_language,
+	confirmed
 `
+	queryFrom := "FROM users"
+	queryWhere := " WHERE "
 	var args []any
 	if pars.ID != nil {
 		args = append(args, *pars.ID)
-		query += fmt.Sprintf(" id = $%v AND", len(args))
+		queryWhere += fmt.Sprintf(" id = $%v AND", len(args))
 	}
 
 	if pars.FirstName != nil {
 		args = append(args, *pars.FirstName)
-		query += fmt.Sprintf(" first_name = $%v AND", len(args))
+		queryWhere += fmt.Sprintf(" first_name = $%v AND", len(args))
 	}
 
 	if pars.LastName != nil {
 		args = append(args, *pars.LastName)
-		query += fmt.Sprintf(" last_name = $%v AND", len(args))
+		queryWhere += fmt.Sprintf(" last_name = $%v AND", len(args))
 	}
 
 	if pars.Nickname != nil {
 		args = append(args, *pars.Nickname)
-		query += fmt.Sprintf(" nickname = $%v AND", len(args))
+		queryWhere += fmt.Sprintf(" nickname = $%v AND", len(args))
 	}
 
 	if pars.Email != nil {
 		args = append(args, *pars.Email)
-		query += fmt.Sprintf(" email = $%v AND", len(args))
+		queryWhere += fmt.Sprintf(" email = $%v AND", len(args))
 	}
 
-	query = query[:len(query)-4] // Remove the trailing " AND"
+	if pars.Confirmed != nil {
+		args = append(args, *pars.Confirmed)
+		queryWhere += fmt.Sprintf(" confirmed = $%v AND", len(args))
 
-	rows, err := Query(ctx, u.db, query, args...)
+	}
+
+	queryWhere = queryWhere[:len(queryWhere)-4] // Remove the trailing " AND"
+
+	if pars.Count {
+		var count int
+
+		err := QueryRow(ctx, u.db, "select count(*) from users "+queryWhere, args...).Scan(&count)
+		if err != nil {
+			return nil, 0, fmt.Errorf("count users: %w", err)
+		}
+
+		return nil, count, err
+	}
+
+	rows, err := Query(ctx, u.db, querySelect+queryFrom+queryWhere, args...)
 	if err != nil {
 		return nil, 0, fmt.Errorf("list users: %w", err)
 	}
@@ -139,6 +165,9 @@ WHERE
 			&user.Nickname,
 			&user.Email,
 			&user.AuthMethod,
+			&user.CreatedAt,
+			&user.FirstLanguage,
+			&user.Confirmed,
 		)
 		if err != nil {
 			return nil, 0, fmt.Errorf("scan user: %w", err)
