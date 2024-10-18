@@ -45,6 +45,7 @@ func main() {
 	mailClient := mail.New(cfg)
 	repo := repository.New(db)
 	srv := service.New(repo)
+
 	uc := usecase.New(
 		srv,
 		repo.Tx,
@@ -54,10 +55,12 @@ func main() {
 		cfg.PublicURL,
 		usecase.WithLogger(log),
 	)
+
 	h := handler.New(
 		uc,
 		handler.WithLogger(log),
 	)
+
 	r := mux.NewRouter()
 	h.InitRoutes(r)
 

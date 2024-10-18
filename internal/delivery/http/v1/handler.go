@@ -34,9 +34,9 @@ func New(uc *usecase.UseCase, opts ...opt) *Handler {
 
 // InitRoutes
 func (h *Handler) InitRoutes(r *mux.Router) {
-	r.HandleFunc("/register", h.Registration)
-	r.HandleFunc("/login", h.Login)
-	r.HandleFunc("/confirm", h.ConfirmEmail)
+	r.HandleFunc("/api/v1/register", h.Registration)
+	r.HandleFunc("/api/v1/login", h.Login)
+	r.HandleFunc("/api/v1/confirm", h.ConfirmEmail)
 }
 
 func (h *Handler) writeBadRequest(w http.ResponseWriter, err error) {

@@ -254,7 +254,7 @@ SELECT
     created_at,
     password
 FROM users
-WHERE nickname = $1 OR email = $1`,
+WHERE nickname = $1 OR email = $1 AND auth_method = 1`,
 		login).Scan(
 		&out.ID,
 		&out.FirstName,

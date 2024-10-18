@@ -95,5 +95,5 @@ func generateRandomCode() (string, error) {
 }
 
 func (uc *UseCase) makeConfirmationURL(code string) string {
-	return fmt.Sprintf("%s/confirm?code=%s", uc.publicURL, code)
+	return fmt.Sprintf("%s/api/v1/confirm?code=%s", uc.publicURL, code)
 }

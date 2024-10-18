@@ -22,7 +22,7 @@ func main() {
 	}
 
 	body, _ := json.Marshal(&obj)
-	resp, err := http.Post("http://localhost:8081/register", "application/json", bytes.NewBuffer(body))
+	resp, err := http.Post("http://localhost:8081/api/v1/register", "application/json", bytes.NewBuffer(body))
 	if err != nil {
 		panic(err)
 	}
