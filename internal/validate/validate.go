@@ -3,6 +3,7 @@ package validate
 import (
 	"context"
 	"fmt"
+	"net/mail"
 	"unicode"
 	"unicode/utf8"
 
@@ -29,11 +30,12 @@ func New(ur userRepo) *Validator {
 func (v *Validator) ValidateUser(ctx context.Context, user models.UserCU, id int64) (map[string]RequiredField, error) {
 	mp := make(map[string]RequiredField)
 
-	if user.FirstName == nil {
+	if user.FirstName == nil && id == -1 {
 		mp["first_name"] = RequiredField{
 			Description: ErrMissingFirstName.Error(),
 		}
-	} else {
+	}
+	if user.FirstName != nil {
 		if *user.FirstName == "" {
 			mp["first_name"] = RequiredField{
 				Description: ErrMissingFirstName.Error(),
@@ -47,11 +49,12 @@ func (v *Validator) ValidateUser(ctx context.Context, user models.UserCU, id int
 		}
 	}
 
-	if user.LastName == nil {
+	if user.LastName == nil && id == -1 {
 		mp["last_name"] = RequiredField{
 			Description: ErrMissingLastName.Error(),
 		}
-	} else {
+	}
+	if user.LastName != nil {
 		if *user.LastName == "" {
 			mp["last_name"] = RequiredField{
 				Description: ErrMissingLastName.Error(),
@@ -65,11 +68,12 @@ func (v *Validator) ValidateUser(ctx context.Context, user models.UserCU, id int
 		}
 	}
 
-	if user.Email == nil {
+	if user.Email == nil && id == -1 {
 		mp["email"] = RequiredField{
 			Description: ErrMissingEmail.Error(),
 		}
-	} else {
+	}
+	if user.Email != nil {
 		if *user.Email == "" {
 			mp["email"] = RequiredField{
 				Description: ErrMissingEmail.Error(),
@@ -79,6 +83,13 @@ func (v *Validator) ValidateUser(ctx context.Context, user models.UserCU, id int
 		if utf8.RuneCountInString(*user.Email) > 100 {
 			mp["email"] = RequiredField{
 				Description: ErrEmailTooLong.Error(),
+			}
+		}
+
+		_, err := mail.ParseAddress(*user.Email)
+		if err != nil {
+			mp["email"] = RequiredField{
+				Description: ErrInvalidEmail.Error(),
 			}
 		}
 
@@ -104,11 +115,12 @@ func (v *Validator) ValidateUser(ctx context.Context, user models.UserCU, id int
 		}
 	}
 
-	if user.Nickname == nil {
+	if user.Nickname == nil && id == -1 {
 		mp["nickname"] = RequiredField{
 			Description: ErrMissingNickname.Error(),
 		}
-	} else {
+	}
+	if user.Nickname != nil {
 		if *user.Nickname == "" {
 			mp["nickname"] = RequiredField{
 				Description: ErrMissingNickname.Error(),
@@ -141,11 +153,12 @@ func (v *Validator) ValidateUser(ctx context.Context, user models.UserCU, id int
 		}
 	}
 
-	if user.Password == nil {
+	if user.Password == nil && id == -1 {
 		mp["password"] = RequiredField{
 			Description: ErrMissingPassword.Error(),
 		}
-	} else {
+	}
+	if user.Password != nil {
 		if *user.Password == "" {
 			mp["password"] = RequiredField{
 				Description: ErrMissingPassword.Error(),
@@ -172,7 +185,6 @@ func validatePassword(password string) (err error) {
 		if unicode.IsSymbol(c) || unicode.IsPunct(c) || unicode.IsSpace(c) {
 			return ErrInvalidPassword
 		}
-
 		if unicode.IsLetter(c) {
 			anyLetter = true
 		}

@@ -20,7 +20,6 @@ import (
 )
 
 func main() {
-
 	cfg, err := config.Get()
 	if err != nil {
 		panic(err)
@@ -43,7 +42,6 @@ func main() {
 	h.InitRoutes(r)
 
 	s := server.New(r, cfg.HTTPPort)
-
 	log.With("port", cfg.HTTPPort).Info("Starting HTTP server")
 	s.Start() // non blocking
 
