@@ -26,25 +26,26 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println(string(body))
 	defer resp.Body.Close()
 
 	respBody, _ := io.ReadAll(resp.Body)
 	fmt.Println(string(respBody), resp.StatusCode)
 
-	//objl := models.UserLogin{
-	//	Login:    "naka",
-	//	Password: "1111b",
-	//}
-	//body, _ = json.Marshal(&objl)
-	//
-	//resp, err = http.Post("http://localhost:8081/login", "application/json", bytes.NewBuffer(body))
-	//if err != nil {
-	//	panic(err)
-	//}
-	//defer resp.Body.Close()
-	//
-	//respBody, _ = io.ReadAll(resp.Body)
-	//fmt.Println(string(respBody), resp.StatusCode)
+	objl := models.UserLogin{
+		Login:    "beka",
+		Password: "1111b",
+	}
+	body, _ = json.Marshal(&objl)
+
+	resp, err = http.Post("http://localhost:8081/api/v1/login", "application/json", bytes.NewBuffer(body))
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	respBody, _ = io.ReadAll(resp.Body)
+	fmt.Println(string(respBody), resp.StatusCode)
 }
 
 func getIntPointer(i int) *int {

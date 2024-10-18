@@ -20,6 +20,12 @@ type (
 
 // New
 func New(uc *usecase.UseCase, opts ...opt) *Handler {
+	key, ok := os.LookupEnv("SECRET_KEY")
+	if !ok {
+		panic("no secret key provided")
+	}
+	secretKey = []byte(key)
+
 	h := &Handler{
 		uc:  uc,
 		log: slog.New(slog.NewJSONHandler(os.Stdout, nil)),
@@ -34,22 +40,19 @@ func New(uc *usecase.UseCase, opts ...opt) *Handler {
 
 // InitRoutes
 func (h *Handler) InitRoutes(r *mux.Router) {
-	r.HandleFunc("/api/v1/register", h.Registration)
-	r.HandleFunc("/api/v1/login", h.Login)
+	r.Use(h.recovery)
+
+	r.HandleFunc("/api/v1/register", h.Registration).Methods(http.MethodPost)
+	r.HandleFunc("/api/v1/login", h.Login).Methods(http.MethodPost)
 	r.HandleFunc("/api/v1/confirm", h.ConfirmEmail)
+	r.HandleFunc("/api/v1/profile", h.authenticateMiddleware(h.UpdateProfile, true)).Methods(http.MethodPut)
+	r.HandleFunc("/api/v1/profile", h.authenticateMiddleware(h.Profile, true)).Methods(http.MethodGet)
+
+	// tokens
+	r.HandleFunc("/api/v1/tokens", h.Tokens)
 }
 
-func (h *Handler) writeBadRequest(w http.ResponseWriter, err error) {
-	http.Error(w, err.Error(), http.StatusBadRequest)
-	h.log.Error(err.Error())
-}
-
-func (h *Handler) writeInternalServerError(w http.ResponseWriter, err error) {
-	http.Error(w, err.Error(), http.StatusInternalServerError)
-	h.log.Error(err.Error())
-}
-
-func writeError(w http.ResponseWriter, err error, code int) {
+func (h *Handler) writeError(w http.ResponseWriter, err error, code int) {
 	errResp := struct {
 		Error string `json:"error"`
 	}{
@@ -60,8 +63,8 @@ func writeError(w http.ResponseWriter, err error, code int) {
 }
 
 func writeJson(w http.ResponseWriter, data interface{}, httpStatus int) {
-	w.WriteHeader(httpStatus)
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(httpStatus)
 	body, _ := json.Marshal(data)
 	w.Write(body)
 }

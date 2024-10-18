@@ -81,6 +81,7 @@ WHERE id = $1`,
 		&user.AuthMethod,
 		&user.CreatedAt,
 		&user.FirstLanguage,
+		&user.Confirmed,
 	)
 	if err != nil {
 		return user, fmt.Errorf("get user: %w", err)
