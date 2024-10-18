@@ -8,17 +8,18 @@ import (
 	"net/http"
 
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/models"
+	"github.com/mrbelka12000/linguo_sphere_backend/pkg/pointer"
 )
 
 func main() {
 	obj := models.UserCU{
-		FirstName:     getStrPointer("bekabekabekabekabekabekabekabekabekabeka"),
-		LastName:      getStrPointer("teka"),
-		Nickname:      getStrPointer("beka"),
-		Email:         getStrPointer("karshyga.beknur@gmail.com"),
-		Password:      getStrPointer("1111b"),
-		AuthMethod:    getIntPointer(1),
-		FirstLanguage: getStrPointer("en"),
+		FirstName:  getStrPointer("bekabekabekabekabekabekabekabekabekabeka"),
+		LastName:   getStrPointer("teka"),
+		Nickname:   getStrPointer("beka"),
+		Email:      getStrPointer("karshyga.beknur@gmail.com"),
+		Password:   getStrPointer("1111b"),
+		AuthMethod: getIntPointer(1),
+		LanguageID: pointer.Of(int64(1)),
 	}
 
 	body, _ := json.Marshal(&obj)

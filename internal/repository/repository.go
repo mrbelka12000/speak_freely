@@ -8,8 +8,9 @@ import (
 type (
 	// Repo
 	Repo struct {
-		User *user
-		Tx   *tx
+		User     *user
+		Tx       *tx
+		Language *language
 	}
 
 	contract interface {
@@ -22,8 +23,9 @@ type (
 // New
 func New(db *sql.DB) *Repo {
 	return &Repo{
-		User: newUser(db),
-		Tx:   newTx(db),
+		User:     newUser(db),
+		Tx:       newTx(db),
+		Language: newLanguage(db),
 	}
 }
 

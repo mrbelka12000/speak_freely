@@ -11,7 +11,6 @@ import (
 // Registration
 func (h *Handler) Registration(w http.ResponseWriter, r *http.Request) {
 	var obj models.UserCU
-
 	err := json.NewDecoder(r.Body).Decode(&obj)
 	if err != nil {
 		h.writeError(w, err, http.StatusBadRequest)
@@ -37,11 +36,14 @@ func (h *Handler) Registration(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeJson(w, struct {
-		ID int64 `json:"id"`
-	}{
-		ID: id,
-	}, http.StatusCreated)
+	tokens, err := createTokens(id)
+	if err != nil {
+		h.writeError(w, err, http.StatusInternalServerError)
+		h.log.With("error", err).Error("can not create tokens")
+		return
+	}
+
+	writeJson(w, tokens, http.StatusOK)
 }
 
 // Login

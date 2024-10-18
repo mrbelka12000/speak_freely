@@ -26,11 +26,22 @@ func (uc *UseCase) UserUpdate(ctx context.Context, id int64, user models.UserCU)
 
 // UserGet
 func (uc *UseCase) UserGet(ctx context.Context, id int64) (models.User, error) {
-	return uc.srv.User.Get(ctx, id)
+	user, err := uc.srv.User.Get(ctx, id)
+	if err != nil {
+		return models.User{}, fmt.Errorf("get user: %w", err)
+	}
+
+	lang, err := uc.srv.Language.Get(ctx, user.LanguageID)
+	if err != nil {
+		return models.User{}, fmt.Errorf("get language: %w", err)
+	}
+	user.Language = &lang
+
+	return user, nil
 }
 
 // UserList
-func (uc *UseCase) UserList(ctx context.Context, pars models.UserPars) ([]models.User, int, error) {
+func (uc *UseCase) UserList(ctx context.Context, pars models.UserListPars) ([]models.User, int, error) {
 	return uc.srv.User.List(ctx, pars)
 }
 

@@ -12,7 +12,8 @@ import (
 
 type (
 	Validator struct {
-		ur userRepo
+		ur   userRepo
+		lang langRepo
 	}
 
 	RequiredField struct {
@@ -21,9 +22,10 @@ type (
 	}
 )
 
-func New(ur userRepo) *Validator {
+func New(ur userRepo, lang langRepo) *Validator {
 	return &Validator{
-		ur: ur,
+		ur:   ur,
+		lang: lang,
 	}
 }
 
@@ -94,7 +96,7 @@ func (v *Validator) ValidateUser(ctx context.Context, user models.UserCU, id int
 			}
 		}
 
-		users, count, err := v.ur.List(ctx, models.UserPars{Email: user.Email})
+		users, count, err := v.ur.List(ctx, models.UserListPars{Email: user.Email})
 		if err != nil {
 			return nil, fmt.Errorf("get user list: %w", err)
 		}
@@ -133,7 +135,7 @@ func (v *Validator) ValidateUser(ctx context.Context, user models.UserCU, id int
 			}
 		}
 
-		users, count, err := v.ur.List(ctx, models.UserPars{Nickname: user.Nickname})
+		users, count, err := v.ur.List(ctx, models.UserListPars{Nickname: user.Nickname})
 		if err != nil {
 			return nil, fmt.Errorf("get user list: %w", err)
 		}
@@ -173,21 +175,22 @@ func (v *Validator) ValidateUser(ctx context.Context, user models.UserCU, id int
 		}
 	}
 
-	if user.FirstLanguage == nil && id == -1 {
-		mp["first_language"] = RequiredField{
-			Description: ErrMissingFirstLanguage.Error(),
+	if user.LanguageID == nil && id == -1 {
+		mp["language_id"] = RequiredField{
+			Description: ErrMissingLanguageID.Error(),
 		}
 	}
 
-	if user.FirstLanguage != nil {
-		if *user.FirstLanguage == "" {
-			mp["first_language"] = RequiredField{
-				Description: ErrMissingFirstLanguage.Error(),
+	if user.LanguageID != nil {
+		if *user.LanguageID == 0 {
+			mp["language_id"] = RequiredField{
+				Description: ErrMissingLanguageID.Error(),
 			}
 		}
-		if utf8.RuneCountInString(*user.FirstLanguage) > 3 {
-			mp["first_language"] = RequiredField{
-				Description: ErrFirstLanguageTooLong.Error(),
+
+		if _, err := v.lang.Get(ctx, *user.LanguageID); err != nil {
+			mp["language_id"] = RequiredField{
+				Description: ErrInvalidLanguageID.Error(),
 			}
 		}
 	}

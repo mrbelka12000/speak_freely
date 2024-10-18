@@ -42,11 +42,16 @@ func New(uc *usecase.UseCase, opts ...opt) *Handler {
 func (h *Handler) InitRoutes(r *mux.Router) {
 	r.Use(h.recovery)
 
+	// users
 	r.HandleFunc("/api/v1/register", h.Registration).Methods(http.MethodPost)
 	r.HandleFunc("/api/v1/login", h.Login).Methods(http.MethodPost)
 	r.HandleFunc("/api/v1/confirm", h.ConfirmEmail)
 	r.HandleFunc("/api/v1/profile", h.authenticateMiddleware(h.UpdateProfile, true)).Methods(http.MethodPut)
 	r.HandleFunc("/api/v1/profile", h.authenticateMiddleware(h.Profile, true)).Methods(http.MethodGet)
+
+	// languages
+	r.HandleFunc("/api/v1/lang", h.LanguageCreate).Methods(http.MethodPost)
+	r.HandleFunc("/api/v1/langs", h.LanguageList)
 
 	// tokens
 	r.HandleFunc("/api/v1/tokens", h.Tokens)

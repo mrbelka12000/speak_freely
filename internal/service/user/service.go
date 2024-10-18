@@ -20,7 +20,7 @@ type (
 		Create(ctx context.Context, user models.UserCU) (int64, error)
 		Get(ctx context.Context, id int64) (models.User, error)
 		Update(ctx context.Context, id int64, user models.UserCU) error
-		List(ctx context.Context, pars models.UserPars) ([]models.User, int, error)
+		List(ctx context.Context, pars models.UserListPars) ([]models.User, int, error)
 		Delete(ctx context.Context, id int64) error
 		FindByLogin(ctx context.Context, login string) (out models.User, err error)
 	}
@@ -57,7 +57,7 @@ func (s *Service) Update(ctx context.Context, id int64, user models.UserCU) erro
 }
 
 // List
-func (s *Service) List(ctx context.Context, pars models.UserPars) ([]models.User, int, error) {
+func (s *Service) List(ctx context.Context, pars models.UserListPars) ([]models.User, int, error) {
 	return s.r.List(ctx, pars)
 }
 

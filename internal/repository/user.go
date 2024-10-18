@@ -28,7 +28,7 @@ func (u *user) Create(ctx context.Context, user models.UserCU) (id int64, err er
 			email,
 			password,
 			auth_method,
-			first_language,
+			language_id,
 			created_at
 			) 
 		VALUES(
@@ -47,7 +47,7 @@ func (u *user) Create(ctx context.Context, user models.UserCU) (id int64, err er
 		*user.Email,
 		*user.Password,
 		*user.AuthMethod,
-		*user.FirstLanguage,
+		*user.LanguageID,
 		user.CreatedAt,
 	).Scan(&id)
 	if err != nil {
@@ -68,7 +68,7 @@ SELECT
     email, 
     auth_method,
     created_at,
-    first_language,
+    language_id,
 	confirmed
 FROM users
 WHERE id = $1`,
@@ -80,7 +80,7 @@ WHERE id = $1`,
 		&user.Email,
 		&user.AuthMethod,
 		&user.CreatedAt,
-		&user.FirstLanguage,
+		&user.LanguageID,
 		&user.Confirmed,
 	)
 	if err != nil {
@@ -91,7 +91,7 @@ WHERE id = $1`,
 }
 
 // List
-func (u *user) List(ctx context.Context, pars models.UserPars) ([]models.User, int, error) {
+func (u *user) List(ctx context.Context, pars models.UserListPars) ([]models.User, int, error) {
 	querySelect := `
    SELECT id, 
     first_name, 
@@ -100,7 +100,7 @@ func (u *user) List(ctx context.Context, pars models.UserPars) ([]models.User, i
     email, 
     auth_method,
 	created_at,
-	first_language,
+	language_id,
 	confirmed
 `
 	queryFrom := "FROM users"
@@ -167,7 +167,7 @@ func (u *user) List(ctx context.Context, pars models.UserPars) ([]models.User, i
 			&user.Email,
 			&user.AuthMethod,
 			&user.CreatedAt,
-			&user.FirstLanguage,
+			&user.LanguageID,
 			&user.Confirmed,
 		)
 		if err != nil {
