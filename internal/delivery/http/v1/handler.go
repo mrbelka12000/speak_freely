@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/mux"
 
@@ -17,15 +18,23 @@ type (
 	}
 )
 
-func New(uc *usecase.UseCase) Handler {
-	return Handler{
-		uc: uc,
+func New(uc *usecase.UseCase, opts ...opt) *Handler {
+	h := &Handler{
+		uc:  uc,
+		log: slog.New(slog.NewJSONHandler(os.Stdout, nil)),
 	}
+
+	for _, opt := range opts {
+		opt(h)
+	}
+
+	return h
 }
 
 func (h *Handler) InitRoutes(r *mux.Router) {
 	r.HandleFunc("/register", h.Registration)
 	r.HandleFunc("/login", h.Login)
+	r.HandleFunc("/confirm", h.ConfirmEmail)
 }
 
 func (h *Handler) writeBadRequest(w http.ResponseWriter, err error) {

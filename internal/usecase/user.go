@@ -2,13 +2,20 @@ package usecase
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/models"
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/validate"
 )
 
 func (uc *UseCase) UserCreate(ctx context.Context, user models.UserCU) (int64, error) {
-	return uc.srv.User.Create(ctx, user)
+	id, err := uc.srv.User.Create(ctx, user)
+	if err != nil {
+		return 0, fmt.Errorf("create user: %w", err)
+	}
+
+	go uc.sendConfirmationEmail(context.WithoutCancel(ctx), id)
+	return id, nil
 }
 
 func (uc *UseCase) UserUpdate(ctx context.Context, id int64, user models.UserCU) error {

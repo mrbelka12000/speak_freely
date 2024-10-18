@@ -2,6 +2,7 @@ package v1
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/models"
@@ -57,5 +58,25 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		ID int64 `json:"id"`
 	}{
 		ID: id,
+	}, http.StatusOK)
+}
+
+func (h *Handler) ConfirmEmail(w http.ResponseWriter, r *http.Request) {
+	code := r.URL.Query().Get("code")
+	if code == "" {
+		h.writeBadRequest(w, errors.New("code is required"))
+		return
+	}
+
+	err := h.uc.UserConfirm(r.Context(), code)
+	if err != nil {
+		h.writeBadRequest(w, err)
+		return
+	}
+
+	writeJson(w, struct {
+		Success bool `json:"success"`
+	}{
+		Success: true,
 	}, http.StatusOK)
 }

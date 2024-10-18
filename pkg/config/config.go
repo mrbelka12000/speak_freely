@@ -20,6 +20,9 @@ type Config struct {
 	SMTPPort       int    `env:"SMTP_PORT, default=587"`
 	SenderEmail    string `env:"SENDER_EMAIL,required"`
 	SMTPPassword   string `env:"SENDER_PASSWORD,required"`
+	PublicURL      string `env:"PUBLIC_URL,required"`
+	RedisAddr      string `env:"REDIS_ADDR,required"`
+	RedisPassword  string `env:"REDIS_PASSWORD,required"`
 }
 
 func Get() (Config, error) {

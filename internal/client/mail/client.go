@@ -8,6 +8,10 @@ import (
 	"github.com/mrbelka12000/linguo_sphere_backend/pkg/config"
 )
 
+const (
+	contentTypeHTML = "text/html"
+)
+
 type (
 	Client struct {
 		smtpHost string
@@ -37,7 +41,7 @@ func (c *Client) Send(req Request) error {
 	message.SetHeader("From", c.smtpUser)
 	message.SetHeader("To", req.To)
 	message.SetHeader("Subject", req.Subject)
-	message.SetBody("text/plain", req.Body)
+	message.SetBody(contentTypeHTML, req.Body)
 
 	dialer := gomail.NewDialer(c.smtpHost, c.smtpPort, c.smtpUser, c.smtpPass)
 

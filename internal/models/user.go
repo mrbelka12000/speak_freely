@@ -10,6 +10,7 @@ type (
 		Password   string `json:"password,omitempty"`
 		AuthMethod int    `json:"auth_method"`
 		CreatedAt  int64  `json:"created_at"`
+		Confirmed  bool   `json:"confirmed"`
 	}
 
 	UserLogin struct {
@@ -25,6 +26,7 @@ type (
 		Password   *string `json:"password,omitempty"`
 		AuthMethod *int    `json:"auth_method"`
 		CreatedAt  int64   `json:"created_at"`
+		Confirmed  bool    `json:"confirmed"`
 	}
 
 	UserPars struct {
@@ -33,5 +35,6 @@ type (
 		LastName  *string
 		Nickname  *string
 		Email     *string
+		Confirmed *bool
 	}
 )

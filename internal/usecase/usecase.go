@@ -1,7 +1,9 @@
 package usecase
 
 import (
-	"context"
+	"html/template"
+	"log/slog"
+	"os"
 
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/service"
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/validate"
@@ -9,22 +11,47 @@ import (
 
 type (
 	UseCase struct {
-		srv       *service.Service
-		tx        txBuilder
-		validator *validate.Validator
-	}
+		srv                  *service.Service
+		tx                   txBuilder
+		validator            *validate.Validator
+		mailSender           mailSender
+		cache                cache
+		emailConfirmTemplate *template.Template
 
-	txBuilder interface {
-		Begin(ctx context.Context) (context.Context, error)
-		Commit(ctx context.Context) error
-		Rollback(ctx context.Context) error
+		log       *slog.Logger
+		publicURL string
 	}
 )
 
-func New(srv *service.Service, tx txBuilder, v *validate.Validator) *UseCase {
-	return &UseCase{
-		srv:       srv,
-		tx:        tx,
-		validator: v,
+func New(
+	srv *service.Service,
+	tx txBuilder,
+	v *validate.Validator,
+	ms mailSender,
+	c cache,
+	publicURL string,
+	opts ...opt,
+) *UseCase {
+	t, err := template.ParseFiles("templates/email_confirmation.html")
+	if err != nil {
+		panic(err)
 	}
+	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+
+	uc := &UseCase{
+		srv:                  srv,
+		tx:                   tx,
+		validator:            v,
+		mailSender:           ms,
+		cache:                c,
+		emailConfirmTemplate: t,
+		log:                  log,
+		publicURL:            publicURL,
+	}
+
+	for _, opt := range opts {
+		opt(uc)
+	}
+
+	return uc
 }

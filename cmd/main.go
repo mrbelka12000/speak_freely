@@ -9,6 +9,7 @@ import (
 
 	"github.com/gorilla/mux"
 
+	"github.com/mrbelka12000/linguo_sphere_backend/internal/client/mail"
 	handler "github.com/mrbelka12000/linguo_sphere_backend/internal/delivery/http/v1"
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/repository"
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/service"
@@ -16,6 +17,7 @@ import (
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/validate"
 	"github.com/mrbelka12000/linguo_sphere_backend/pkg/config"
 	"github.com/mrbelka12000/linguo_sphere_backend/pkg/database"
+	"github.com/mrbelka12000/linguo_sphere_backend/pkg/redis"
 	"github.com/mrbelka12000/linguo_sphere_backend/pkg/server"
 )
 
@@ -34,10 +36,28 @@ func main() {
 	}
 	defer db.Close()
 
+	rCache, err := redis.New(cfg)
+	if err != nil {
+		log.With("error", err).Error("failed to connect to redis")
+		return
+	}
+
+	mailClient := mail.New(cfg)
 	repo := repository.New(db)
 	srv := service.New(repo)
-	uc := usecase.New(srv, repo.Tx, validate.New(repo.User))
-	h := handler.New(uc)
+	uc := usecase.New(
+		srv,
+		repo.Tx,
+		validate.New(repo.User),
+		mailClient,
+		rCache,
+		cfg.PublicURL,
+		usecase.WithLogger(log),
+	)
+	h := handler.New(
+		uc,
+		handler.WithLogger(log),
+	)
 	r := mux.NewRouter()
 	h.InitRoutes(r)
 

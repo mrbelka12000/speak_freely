@@ -154,10 +154,9 @@ WHERE
 func (u *user) Update(ctx context.Context, id int64, user models.UserCU) error {
 	queryUpdate := `
 UPDATE users
-set 
+SET 
 `
 
-	queryFrom := "FROM users"
 	queryWhere := "WHERE id = $1"
 
 	var args []any
@@ -165,25 +164,32 @@ set
 
 	if user.FirstName != nil {
 		args = append(args, *user.FirstName)
-		queryUpdate += fmt.Sprintf(" first_name = $%v,", len(args))
+		queryUpdate += fmt.Sprintf(" first_name = $%v ,", len(args))
 	}
 
 	if user.LastName != nil {
 		args = append(args, *user.LastName)
-		queryUpdate += fmt.Sprintf(" last_name = $%v,", len(args))
+		queryUpdate += fmt.Sprintf(" last_name = $%v ,", len(args))
 	}
 
 	if user.Nickname != nil {
 		args = append(args, *user.Nickname)
-		queryUpdate += fmt.Sprintf(" nickname = $%v,", len(args))
+		queryUpdate += fmt.Sprintf(" nickname = $%v ,", len(args))
 	}
 
 	if user.Email != nil {
 		args = append(args, *user.Email)
-		queryUpdate += fmt.Sprintf(" email = $%v,", len(args))
+		queryUpdate += fmt.Sprintf(" email = $%v ,", len(args))
 	}
 
-	_, err := Exec(ctx, u.db, queryUpdate+queryFrom+queryWhere, args...)
+	if user.Confirmed {
+		args = append(args, user.Confirmed)
+		queryUpdate += fmt.Sprintf(" confirmed = $%v ,", len(args))
+	}
+
+	queryUpdate = queryUpdate[:len(queryUpdate)-1]
+
+	_, err := Exec(ctx, u.db, queryUpdate+queryWhere, args...)
 	if err != nil {
 		return fmt.Errorf("exec update: %w", err)
 	}
