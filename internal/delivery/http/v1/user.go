@@ -111,6 +111,17 @@ func (h *Handler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	missed, err := h.uc.UserCUValidate(r.Context(), obj, idInt64)
+	if err != nil {
+		h.writeError(w, err, http.StatusInternalServerError)
+		h.log.With("error", err).Error("can not validate")
+		return
+	}
+	if len(missed) > 0 {
+		writeJson(w, missed, http.StatusBadRequest)
+		return
+	}
+
 	err = h.uc.UserUpdate(r.Context(), idInt64, obj)
 	if err != nil {
 		h.writeError(w, err, http.StatusBadRequest)
