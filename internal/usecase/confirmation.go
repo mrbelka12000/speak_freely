@@ -13,6 +13,7 @@ import (
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/models"
 )
 
+// UserConfirm
 func (uc *UseCase) UserConfirm(ctx context.Context, code string) error {
 	id, ok := uc.cache.GetInt64(code)
 	if !ok {

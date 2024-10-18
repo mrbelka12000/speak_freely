@@ -18,6 +18,7 @@ func newUser(db *sql.DB) *user {
 	}
 }
 
+// Create
 func (u *user) Create(ctx context.Context, user models.UserCU) (id int64, err error) {
 	err = QueryRow(ctx, u.db, `
 		INSERT INTO users(
@@ -52,6 +53,7 @@ func (u *user) Create(ctx context.Context, user models.UserCU) (id int64, err er
 	return id, nil
 }
 
+// Get
 func (u *user) Get(ctx context.Context, id int64) (user models.User, err error) {
 	err = QueryRow(ctx, u.db, `
 SELECT 
@@ -80,6 +82,7 @@ WHERE id = $1`,
 	return user, nil
 }
 
+// List
 func (u *user) List(ctx context.Context, pars models.UserPars) ([]models.User, int, error) {
 	query := `
 SELECT 
@@ -151,6 +154,7 @@ WHERE
 	return users, len(users), nil
 }
 
+// Update
 func (u *user) Update(ctx context.Context, id int64, user models.UserCU) error {
 	queryUpdate := `
 UPDATE users
@@ -197,6 +201,7 @@ SET
 	return nil
 }
 
+// Delete
 func (u *user) Delete(ctx context.Context, id int64) error {
 
 	_, err := Exec(ctx, u.db, "DELETE FROM users WHERE id = $1", id)
@@ -207,6 +212,7 @@ func (u *user) Delete(ctx context.Context, id int64) error {
 	return nil
 }
 
+// FindByLogin
 func (u *user) FindByLogin(ctx context.Context, login string) (out models.User, err error) {
 	err = QueryRow(ctx, u.db, `
 SELECT 

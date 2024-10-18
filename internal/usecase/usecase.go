@@ -10,6 +10,7 @@ import (
 )
 
 type (
+	// UseCase
 	UseCase struct {
 		srv                  *service.Service
 		tx                   txBuilder
@@ -23,6 +24,7 @@ type (
 	}
 )
 
+// New
 func New(
 	srv *service.Service,
 	tx txBuilder,

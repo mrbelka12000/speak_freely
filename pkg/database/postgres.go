@@ -11,7 +11,7 @@ import (
 	"github.com/mrbelka12000/linguo_sphere_backend/pkg/config"
 )
 
-// Connect ..
+// Connect
 func Connect(cfg config.Config) (*sql.DB, error) {
 	db, err := sql.Open("postgres", cfg.PGURL)
 	if err != nil {

@@ -8,6 +8,7 @@ import (
 	"github.com/sethvargo/go-envconfig"
 )
 
+// Config of service
 type Config struct {
 	PGURL          string `env:"PG_URL,required"`
 	MigrationsPath string `env:"MIGRATIONS_PATH, default=migrations/"`
@@ -25,6 +26,7 @@ type Config struct {
 	RedisPassword  string `env:"REDIS_PASSWORD,required"`
 }
 
+// Get
 func Get() (Config, error) {
 	return parseConfig()
 }

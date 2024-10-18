@@ -8,6 +8,7 @@ import (
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/models"
 )
 
+// Registration
 func (h *Handler) Registration(w http.ResponseWriter, r *http.Request) {
 	var obj models.UserCU
 
@@ -40,6 +41,7 @@ func (h *Handler) Registration(w http.ResponseWriter, r *http.Request) {
 	}, http.StatusCreated)
 }
 
+// Login
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	var obj models.UserLogin
 	err := json.NewDecoder(r.Body).Decode(&obj)
@@ -61,6 +63,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	}, http.StatusOK)
 }
 
+// ConfirmEmail
 func (h *Handler) ConfirmEmail(w http.ResponseWriter, r *http.Request) {
 	code := r.URL.Query().Get("code")
 	if code == "" {

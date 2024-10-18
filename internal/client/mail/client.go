@@ -13,6 +13,7 @@ const (
 )
 
 type (
+	// Client
 	Client struct {
 		smtpHost string
 		smtpPort int
@@ -20,6 +21,7 @@ type (
 		smtpPass string
 	}
 
+	// Request
 	Request struct {
 		To      string
 		Body    string
@@ -27,6 +29,7 @@ type (
 	}
 )
 
+// New
 func New(cfg config.Config) *Client {
 	return &Client{
 		smtpUser: cfg.SenderEmail,
@@ -36,6 +39,7 @@ func New(cfg config.Config) *Client {
 	}
 }
 
+// Send
 func (c *Client) Send(req Request) error {
 	message := gomail.NewMessage()
 	message.SetHeader("From", c.smtpUser)

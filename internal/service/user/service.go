@@ -34,7 +34,7 @@ func New(r repo) *Service {
 	}
 }
 
-// Create new user
+// Create
 func (s *Service) Create(ctx context.Context, user models.UserCU) (int64, error) {
 	user.CreatedAt = time.Now().Unix()
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(*user.Password), s.bcryptCost)
@@ -46,12 +46,12 @@ func (s *Service) Create(ctx context.Context, user models.UserCU) (int64, error)
 	return s.r.Create(ctx, user)
 }
 
-// Get by id
+// Get
 func (s *Service) Get(ctx context.Context, id int64) (models.User, error) {
 	return s.r.Get(ctx, id)
 }
 
-// Update user data
+// Update
 func (s *Service) Update(ctx context.Context, id int64, user models.UserCU) error {
 	return s.r.Update(ctx, id, user)
 }
@@ -61,10 +61,12 @@ func (s *Service) List(ctx context.Context, pars models.UserPars) ([]models.User
 	return s.r.List(ctx, pars)
 }
 
+// Delete
 func (s *Service) Delete(ctx context.Context, id int64) error {
 	return s.r.Delete(ctx, id)
 }
 
+// Login
 func (s *Service) Login(ctx context.Context, obj models.UserLogin) (int64, error) {
 	user, err := s.r.FindByLogin(ctx, obj.Login)
 	if err != nil {

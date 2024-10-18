@@ -27,6 +27,7 @@ func New(ur userRepo) *Validator {
 	}
 }
 
+// ValidateUser validates create and update of users information
 func (v *Validator) ValidateUser(ctx context.Context, user models.UserCU, id int64) (map[string]RequiredField, error) {
 	mp := make(map[string]RequiredField)
 

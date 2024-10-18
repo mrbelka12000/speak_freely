@@ -6,6 +6,7 @@ import (
 )
 
 type (
+	// Repo
 	Repo struct {
 		User *user
 		Tx   *tx
@@ -18,6 +19,7 @@ type (
 	}
 )
 
+// New
 func New(db *sql.DB) *Repo {
 	return &Repo{
 		User: newUser(db),
@@ -34,14 +36,17 @@ func getConnectionToDB(ctx context.Context, db *sql.DB) contract {
 	return db
 }
 
+// Exec custom exec function to implement transactions login
 func Exec(ctx context.Context, db *sql.DB, query string, args ...interface{}) (sql.Result, error) {
 	return getConnectionToDB(ctx, db).ExecContext(ctx, query, args...)
 }
 
+// Query custom query function to implement transactions login
 func Query(ctx context.Context, db *sql.DB, query string, args ...interface{}) (*sql.Rows, error) {
 	return getConnectionToDB(ctx, db).QueryContext(ctx, query, args...)
 }
 
+// QueryRow custom queryRow function to implement transactions login
 func QueryRow(ctx context.Context, db *sql.DB, query string, args ...interface{}) *sql.Row {
 	return getConnectionToDB(ctx, db).QueryRowContext(ctx, query, args...)
 }

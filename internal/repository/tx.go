@@ -22,6 +22,7 @@ func newTx(db *sql.DB) *tx {
 	return &tx{db: db}
 }
 
+// Begin start transaction
 func (t *tx) Begin(ctx context.Context) (context.Context, error) {
 	tx, err := t.db.Begin()
 	if err != nil {
@@ -31,6 +32,7 @@ func (t *tx) Begin(ctx context.Context) (context.Context, error) {
 	return context.WithValue(ctx, key, tx), nil
 }
 
+// Commit finish transaction
 func (t *tx) Commit(ctx context.Context) error {
 	tx, err := getTxFromContext(ctx)
 	if err != nil {
@@ -40,6 +42,7 @@ func (t *tx) Commit(ctx context.Context) error {
 	return tx.Commit()
 }
 
+// Rollback undo transaction
 func (t *tx) Rollback(ctx context.Context) error {
 	tx, err := getTxFromContext(ctx)
 	if err != nil {

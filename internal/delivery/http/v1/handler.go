@@ -18,6 +18,7 @@ type (
 	}
 )
 
+// New
 func New(uc *usecase.UseCase, opts ...opt) *Handler {
 	h := &Handler{
 		uc:  uc,
@@ -31,6 +32,7 @@ func New(uc *usecase.UseCase, opts ...opt) *Handler {
 	return h
 }
 
+// InitRoutes
 func (h *Handler) InitRoutes(r *mux.Router) {
 	r.HandleFunc("/register", h.Registration)
 	r.HandleFunc("/login", h.Login)

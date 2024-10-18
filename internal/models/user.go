@@ -1,6 +1,8 @@
 package models
 
 type (
+
+	// User general user information
 	User struct {
 		ID         int64  `json:"id"`
 		FirstName  string `json:"first_name"`
@@ -13,11 +15,13 @@ type (
 		Confirmed  bool   `json:"confirmed"`
 	}
 
+	// UserLogin for login to the website
 	UserLogin struct {
 		Login    string `json:"login"` // nickname/email
 		Password string `json:"password"`
 	}
 
+	// UserCU object to create/update user information
 	UserCU struct {
 		FirstName  *string `json:"first_name"`
 		LastName   *string `json:"last_name"`
@@ -29,6 +33,7 @@ type (
 		Confirmed  bool    `json:"confirmed"`
 	}
 
+	// UserPars for list users
 	UserPars struct {
 		ID        *int64
 		FirstName *string
