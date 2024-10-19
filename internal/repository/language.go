@@ -28,7 +28,18 @@ func (l *language) Create(ctx context.Context, obj models.LanguageCU) error {
 }
 
 func (l *language) Get(ctx context.Context, id int64) (obj models.Language, err error) {
-	err = l.db.QueryRowContext(ctx, `SELECT id, short_name, long_name FROM languages WHERE id = $1`, id).Scan(&obj.ID, &obj.ShortName, &obj.LongName)
+	err = l.db.QueryRowContext(ctx, `SELECT id, short_name, long_name FROM languages WHERE id = $1`, id).
+		Scan(&obj.ID, &obj.ShortName, &obj.LongName)
+	if err != nil {
+		return obj, fmt.Errorf("query: %w", err)
+	}
+
+	return obj, nil
+}
+
+func (l *language) GetByShortName(ctx context.Context, shortName string) (obj models.Language, err error) {
+	err = l.db.QueryRowContext(ctx, `SELECT id, short_name, long_name FROM languages WHERE short_name = $1`, shortName).
+		Scan(&obj.ID, &obj.ShortName, &obj.LongName)
 	if err != nil {
 		return obj, fmt.Errorf("query: %w", err)
 	}
