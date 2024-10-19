@@ -16,21 +16,14 @@ func (h *Handler) LanguageCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	missed, err := h.uc.LanguageValidate(r.Context(), obj)
+	missed, err := h.uc.LanguageCreate(r.Context(), obj)
 	if err != nil {
 		h.writeError(w, err, http.StatusInternalServerError)
-		h.log.With("error", err).Info("can not validate language")
+		h.log.With("error", err).Info("can not create language")
 		return
 	}
 	if len(missed) > 0 {
 		writeJson(w, missed, http.StatusBadRequest)
-		return
-	}
-
-	err = h.uc.LanguageCreate(r.Context(), obj)
-	if err != nil {
-		h.writeError(w, err, http.StatusInternalServerError)
-		h.log.With("error", err).Info("can not create language")
 		return
 	}
 

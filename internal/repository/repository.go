@@ -12,6 +12,7 @@ type (
 		Tx       *tx
 		Language *language
 		Theme    *theme
+		File     *file
 	}
 
 	contract interface {
@@ -28,6 +29,7 @@ func New(db *sql.DB) *Repo {
 		Tx:       newTx(db),
 		Language: newLanguage(db),
 		Theme:    newTheme(db),
+		File:     newFile(db),
 	}
 }
 

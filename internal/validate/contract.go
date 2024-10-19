@@ -13,4 +13,8 @@ type (
 	langRepo interface {
 		Get(ctx context.Context, id int64) (models.Language, error)
 	}
+	fileRepo interface {
+		Get(ctx context.Context, id int64) (models.File, error)
+		GetByKey(ctx context.Context, key string) (models.File, error)
+	}
 )

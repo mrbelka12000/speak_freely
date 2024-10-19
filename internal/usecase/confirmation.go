@@ -20,7 +20,7 @@ func (uc *UseCase) UserConfirm(ctx context.Context, code string) error {
 		return errors.New("can not find code in cache")
 	}
 
-	err := uc.UserUpdate(ctx, id, models.UserCU{
+	_, err := uc.UserUpdate(ctx, id, models.UserCU{
 		Confirmed: true,
 	})
 	if err != nil {

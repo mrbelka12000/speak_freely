@@ -21,7 +21,9 @@ type (
 		gen                  generator
 		storage              storage
 		log                  *slog.Logger
-		publicURL            string
+
+		publicURL string
+		minIOURL  string
 	}
 )
 

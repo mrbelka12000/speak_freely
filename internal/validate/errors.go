@@ -39,4 +39,8 @@ var (
 	ErrMissingLevel    = errors.New("level not provided")
 	ErrMissingTopic    = errors.New("topic not provided")
 	ErrMissingQuestion = errors.New("question not provided")
+
+	// File validation
+	ErrMissingFileKey = errors.New("key not provided")
+	ErrFileKeyIsUsed  = errors.New("key is used")
 )

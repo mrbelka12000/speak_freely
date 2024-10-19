@@ -13,7 +13,6 @@ CREATE TABLE "users" (
 
 CREATE TABLE "files" (
                          "id" SERIAL PRIMARY KEY,
-                         "url" TEXT UNIQUE NOT NULL,
                          "key" TEXT UNIQUE NOT NULL
 );
 

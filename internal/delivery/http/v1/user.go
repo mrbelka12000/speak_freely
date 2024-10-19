@@ -18,21 +18,15 @@ func (h *Handler) Registration(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	missed, err := h.uc.UserCUValidate(r.Context(), obj, -1)
-	if err != nil {
-		h.writeError(w, err, http.StatusInternalServerError)
-		h.log.With("error", err).Error("can not validate")
-		return
-	}
-	if len(missed) > 0 {
-		writeJson(w, missed, http.StatusBadRequest)
-		return
-	}
-
-	id, err := h.uc.UserCreate(r.Context(), obj)
+	id, missed, err := h.uc.UserCreate(r.Context(), obj)
 	if err != nil {
 		h.writeError(w, err, http.StatusInternalServerError)
 		h.log.With("error", err).Error("can not create user")
+		return
+	}
+
+	if len(missed) > 0 {
+		writeJson(w, missed, http.StatusBadRequest)
 		return
 	}
 
@@ -113,21 +107,15 @@ func (h *Handler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	missed, err := h.uc.UserCUValidate(r.Context(), obj, idInt64)
-	if err != nil {
-		h.writeError(w, err, http.StatusInternalServerError)
-		h.log.With("error", err).Error("can not validate")
-		return
-	}
-	if len(missed) > 0 {
-		writeJson(w, missed, http.StatusBadRequest)
-		return
-	}
-
-	err = h.uc.UserUpdate(r.Context(), idInt64, obj)
+	missed, err := h.uc.UserUpdate(r.Context(), idInt64, obj)
 	if err != nil {
 		h.writeError(w, err, http.StatusBadRequest)
 		h.log.With("error", err).Error("can not update user")
+		return
+	}
+
+	if len(missed) > 0 {
+		writeJson(w, missed, http.StatusBadRequest)
 		return
 	}
 

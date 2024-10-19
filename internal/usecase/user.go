@@ -9,19 +9,40 @@ import (
 )
 
 // UserCreate
-func (uc *UseCase) UserCreate(ctx context.Context, user models.UserCU) (int64, error) {
+func (uc *UseCase) UserCreate(ctx context.Context, user models.UserCU) (int64, map[string]validate.RequiredField, error) {
+	missed, err := uc.validator.ValidateUser(ctx, user, -1)
+	if err != nil {
+		return 0, nil, fmt.Errorf("validate user: %w", err)
+	}
+	if len(missed) > 0 {
+		return 0, missed, nil
+	}
+
 	id, err := uc.srv.User.Create(ctx, user)
 	if err != nil {
-		return 0, fmt.Errorf("create user: %w", err)
+		return 0, nil, fmt.Errorf("create user: %w", err)
 	}
 
 	go uc.sendConfirmationEmail(context.WithoutCancel(ctx), id)
-	return id, nil
+	return id, nil, nil
 }
 
 // UserUpdate
-func (uc *UseCase) UserUpdate(ctx context.Context, id int64, user models.UserCU) error {
-	return uc.srv.User.Update(ctx, id, user)
+func (uc *UseCase) UserUpdate(ctx context.Context, id int64, user models.UserCU) (map[string]validate.RequiredField, error) {
+	missed, err := uc.validator.ValidateUser(ctx, user, id)
+	if err != nil {
+		return nil, fmt.Errorf("validate user: %w", err)
+	}
+	if len(missed) > 0 {
+		return missed, nil
+	}
+
+	err = uc.srv.User.Update(ctx, id, user)
+	if err != nil {
+		return nil, fmt.Errorf("update user: %w", err)
+	}
+
+	return nil, nil
 }
 
 // UserGet
@@ -53,9 +74,4 @@ func (uc *UseCase) UserDelete(ctx context.Context, id int64) error {
 // UserLogin
 func (uc *UseCase) UserLogin(ctx context.Context, obj models.UserLogin) (int64, error) {
 	return uc.srv.User.Login(ctx, obj)
-}
-
-// UserCUValidate
-func (uc *UseCase) UserCUValidate(ctx context.Context, user models.UserCU, id int64) (map[string]validate.RequiredField, error) {
-	return uc.validator.ValidateUser(ctx, user, id)
 }

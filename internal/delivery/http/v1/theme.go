@@ -19,21 +19,14 @@ func (h *Handler) CreateTheme(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	missed, err := h.uc.ThemeValidate(r.Context(), obj)
+	id, missed, err := h.uc.ThemeBuild(r.Context(), obj)
 	if err != nil {
 		h.writeError(w, err, http.StatusInternalServerError)
-		h.log.With("error", err).Error("validate theme error")
+		h.log.With("error", err).Error("build theme")
 		return
 	}
 	if len(missed) > 0 {
 		writeJson(w, missed, http.StatusBadRequest)
-		return
-	}
-
-	id, err := h.uc.ThemeBuild(r.Context(), obj)
-	if err != nil {
-		h.writeError(w, err, http.StatusInternalServerError)
-		h.log.With("error", err).Error("build theme")
 		return
 	}
 

@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/repository"
+	fileservice "github.com/mrbelka12000/linguo_sphere_backend/internal/service/file"
 	languageservice "github.com/mrbelka12000/linguo_sphere_backend/internal/service/language"
 	themeservice "github.com/mrbelka12000/linguo_sphere_backend/internal/service/theme"
 	userservice "github.com/mrbelka12000/linguo_sphere_backend/internal/service/user"
@@ -12,6 +13,7 @@ type Service struct {
 	User     *userservice.Service
 	Language *languageservice.Service
 	Theme    *themeservice.Service
+	File     *fileservice.Service
 }
 
 // New create instance of service
@@ -20,5 +22,6 @@ func New(r *repository.Repo) *Service {
 		User:     userservice.New(r.User),
 		Language: languageservice.New(r.Language),
 		Theme:    themeservice.New(r.Theme),
+		File:     fileservice.New(r.File),
 	}
 }

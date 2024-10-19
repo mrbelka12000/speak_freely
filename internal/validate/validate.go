@@ -14,6 +14,7 @@ type (
 	Validator struct {
 		ur   userRepo
 		lang langRepo
+		file fileRepo
 	}
 
 	RequiredField struct {
@@ -22,10 +23,11 @@ type (
 	}
 )
 
-func New(ur userRepo, lang langRepo) *Validator {
+func New(ur userRepo, lang langRepo, file fileRepo) *Validator {
 	return &Validator{
 		ur:   ur,
 		lang: lang,
+		file: file,
 	}
 }
 
@@ -274,5 +276,32 @@ func (v *Validator) ValidateTheme(ctx context.Context, obj models.ThemeCU) (map[
 			Description: ErrMissingQuestion.Error(),
 		}
 	}
+	return mp, nil
+}
+
+func (v *Validator) ValidateFile(ctx context.Context, obj models.FileCU) (map[string]RequiredField, error) {
+	mp := make(map[string]RequiredField)
+
+	if obj.Key == nil {
+		mp["key"] = RequiredField{
+			Description: ErrMissingFileKey.Error(),
+		}
+	}
+
+	if obj.Key != nil {
+		if *obj.Key == "" {
+			mp["key"] = RequiredField{
+				Description: ErrMissingFileKey.Error(),
+			}
+		}
+
+		_, err := v.file.GetByKey(ctx, *obj.Key)
+		if err == nil {
+			mp["key"] = RequiredField{
+				Description: ErrFileKeyIsUsed.Error(),
+			}
+		}
+	}
+
 	return mp, nil
 }

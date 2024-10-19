@@ -14,6 +14,7 @@ import (
 type (
 	Storage struct {
 		client *minio.Client
+		addr   string
 		bucket string
 	}
 )
@@ -31,6 +32,7 @@ func Connect(cfg config.Config) (*Storage, error) {
 	return &Storage{
 		client: minioClient,
 		bucket: cfg.MinIOBucket,
+		addr:   cfg.MinIOAddr,
 	}, nil
 }
 

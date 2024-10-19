@@ -10,10 +10,6 @@ import (
 	"github.com/mrbelka12000/linguo_sphere_backend/pkg/pointer"
 )
 
-func (uc *UseCase) ThemeValidate(ctx context.Context, theme models.ThemeCU) (map[string]validate.RequiredField, error) {
-	return uc.validator.ValidateTheme(ctx, theme)
-}
-
 func (uc *UseCase) ThemeGet(ctx context.Context, id int64) (models.Theme, error) {
 	theme, err := uc.srv.Theme.Get(ctx, id)
 	if err != nil {
@@ -29,8 +25,21 @@ func (uc *UseCase) ThemeGet(ctx context.Context, id int64) (models.Theme, error)
 	return theme, nil
 }
 
-func (uc *UseCase) ThemeBuild(ctx context.Context, obj models.ThemeCU) (int64, error) {
-	return uc.srv.Theme.Create(ctx, obj)
+func (uc *UseCase) ThemeBuild(ctx context.Context, obj models.ThemeCU) (int64, map[string]validate.RequiredField, error) {
+	missed, err := uc.validator.ValidateTheme(ctx, obj)
+	if err != nil {
+		return 0, nil, fmt.Errorf("validate theme %w", err)
+	}
+	if len(missed) > 0 {
+		return 0, missed, nil
+	}
+
+	id, err := uc.srv.Theme.Create(ctx, obj)
+	if err != nil {
+		return 0, nil, fmt.Errorf("create theme %w", err)
+	}
+
+	return id, nil, nil
 }
 
 func (uc *UseCase) ThemesGenerateWithAI(ctx context.Context, level string) error {
