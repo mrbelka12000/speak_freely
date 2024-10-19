@@ -21,6 +21,7 @@ import (
 	"github.com/mrbelka12000/linguo_sphere_backend/pkg/database"
 	"github.com/mrbelka12000/linguo_sphere_backend/pkg/redis"
 	"github.com/mrbelka12000/linguo_sphere_backend/pkg/server"
+	"github.com/mrbelka12000/linguo_sphere_backend/pkg/storage/minio"
 )
 
 func main() {
@@ -44,6 +45,13 @@ func main() {
 		return
 	}
 
+	minIOClient, err := minio.Connect(cfg)
+	if err != nil {
+		log.With("error", err).Error("failed to connect to minio")
+		return
+	}
+	_ = minIOClient
+
 	aiClient := ai.NewClient(
 		cfg.AIToken,
 		ai.WithLogger(log),
@@ -63,8 +71,7 @@ func main() {
 		usecase.WithLogger(log),
 	)
 
-	cron := internal.NewCron(uc, log)
-	cron.Start()
+	internal.NewCron(uc, log).Start() // non blocking
 
 	h := handler.New(
 		uc,
