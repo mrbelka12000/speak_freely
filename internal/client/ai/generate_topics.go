@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
+	"strings"
 )
 
 type (
@@ -20,21 +21,21 @@ type (
 )
 
 const (
-	topicsPrompt = `Generate random topic to discuss and learn foreign language
+	topicsPrompt = `Generate random topics to discuss and learn foreign language
 please provide response format with json(without any extra text, without formatting, only raw json, without newlines)
-Here example of response:
+Here is an example of a response:
 [
    {
-	     "lang": "en",
-         "topic":"Describe your hometown",
-         "question":"What are the best things about the place where you grew up?"
+		"lang": "en",
+		"topic":"Describe your hometown",
+		"question":"What are the best things about the place where you grew up?"
    }
 ]
-
 "lang" should be replaced with "ru" / "en" / "fr" / "es" / "pt" / "ko" / "de" / "it" / "ja" / "tr"
-level of difficulty should be %v
-Provide for all languages that i need
-Theme for discuss:
+The level of difficulty should be %v
+Provide for all languages that I need
+Topic and question should be in the same language as "lang"
+You can choose randomly from these topics:
 %v
 `
 )
@@ -49,13 +50,12 @@ var preferences = []string{
 func (c *Client) GenerateTopics(ctx context.Context, request GenerateTopicsRequest) ([]GenerateTopicsResponse, error) {
 	var out Out
 
-	topic := getRandomTopic(preferences)
 	err := c.do(ctx, In{
 		Model: c.gptModel,
 		Messages: []Message{
 			{
 				Role:    "user",
-				Content: fmt.Sprintf(topicsPrompt, request.Level, topic),
+				Content: fmt.Sprintf(topicsPrompt, request.Level, strings.Join(preferences, " | ")),
 			},
 		},
 	},

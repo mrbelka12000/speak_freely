@@ -34,4 +34,9 @@ var (
 	// Language validation
 	ErrMissingShortName = errors.New("short name not provided")
 	ErrMissingLongName  = errors.New("long name not provided")
+
+	// Theme validation
+	ErrMissingLevel    = errors.New("level not provided")
+	ErrMissingTopic    = errors.New("topic not provided")
+	ErrMissingQuestion = errors.New("question not provided")
 )

@@ -7,8 +7,8 @@ CREATE TABLE "users" (
                          "password" VARCHAR(200) NOT NULL,
                          "auth_method" INTEGER DEFAULT 1,
                          "confirmed" BOOLEAN DEFAULT false,
-                         "language_id" INTEGER NOT NULL,
-                         "created_at" BIGINT NOT NULL
+                         "created_at" BIGINT NOT NULL,
+                         "language_id" INTEGER NOT NULL
 );
 
 CREATE TABLE "files" (
@@ -18,25 +18,20 @@ CREATE TABLE "files" (
 
 CREATE TABLE "transcripts" (
                                "id" SERIAL PRIMARY KEY,
-                               "language_id" INTEGER NOT NULL,
                                "text" TEXT NOT NULL,
+                               "accurancy" DOUBLE PRECISION,
+                               "language_id" INTEGER NOT NULL,
                                "user_id" INTEGER NOT NULL,
                                "file_id" INTEGER NOT NULL,
-                               "theme_id" INTEGER NOT NULL,
-                               "accurancy" DOUBLE PRECISION
+                               "theme_id" INTEGER NOT NULL
 );
 
 CREATE TABLE "themes" (
-                          "id" SERIAL PRIMARY KEY,
-                          "level" SMALLINT NOT NULL
-);
-
-CREATE TABLE "theme_localisation" (
-                                      "id" SERIAL PRIMARY KEY,
-                                      "language_id" INTEGER NOT NULL,
-                                      "theme_id" INTEGER NOT NULL,
-                                      "name" TEXT NOT NULL,
-                                      "question" TEXT NOT NULL
+                              "id" SERIAL PRIMARY KEY,
+                              "level" VARCHAR(3) NOT NULL,
+                              "topic" TEXT NOT NULL,
+                              "question" TEXT NOT NULL,
+                              "language_id" INTEGER NOT NULL
 );
 
 CREATE TABLE "languages" (
@@ -55,6 +50,4 @@ ALTER TABLE "transcripts" ADD FOREIGN KEY ("language_id") REFERENCES "languages"
 
 ALTER TABLE "users" ADD FOREIGN KEY ("language_id") REFERENCES "languages" ("id");
 
-ALTER TABLE "theme_localisation" ADD FOREIGN KEY ("language_id") REFERENCES "languages" ("id");
-
-ALTER TABLE "theme_localisation" ADD FOREIGN KEY ("theme_id") REFERENCES "themes" ("id");
+ALTER TABLE "themes" ADD FOREIGN KEY ("language_id") REFERENCES "languages" ("id");

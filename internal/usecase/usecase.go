@@ -18,6 +18,7 @@ type (
 		mailSender           mailSender
 		cache                cache
 		emailConfirmTemplate *template.Template
+		gen                  generator
 
 		log       *slog.Logger
 		publicURL string
@@ -31,6 +32,7 @@ func New(
 	v *validate.Validator,
 	ms mailSender,
 	c cache,
+	gen generator,
 	publicURL string,
 	opts ...opt,
 ) *UseCase {
@@ -47,6 +49,7 @@ func New(
 		mailSender:           ms,
 		cache:                c,
 		emailConfirmTemplate: t,
+		gen:                  gen,
 		log:                  log,
 		publicURL:            publicURL,
 	}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/mrbelka12000/linguo_sphere_backend/internal/client/ai"
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/client/mail"
 )
 
@@ -23,5 +24,9 @@ type (
 		Get(key string) (string, bool)
 		GetInt64(key string) (int64, bool)
 		Delete(key string)
+	}
+
+	generator interface {
+		GenerateTopics(ctx context.Context, request ai.GenerateTopicsRequest) ([]ai.GenerateTopicsResponse, error)
 	}
 )

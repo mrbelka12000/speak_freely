@@ -9,6 +9,8 @@ import (
 
 	"github.com/gorilla/mux"
 
+	"github.com/mrbelka12000/linguo_sphere_backend/internal"
+	"github.com/mrbelka12000/linguo_sphere_backend/internal/client/ai"
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/client/mail"
 	handler "github.com/mrbelka12000/linguo_sphere_backend/internal/delivery/http/v1"
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/repository"
@@ -42,6 +44,10 @@ func main() {
 		return
 	}
 
+	aiClient := ai.NewClient(
+		cfg.AIToken,
+		ai.WithLogger(log),
+	)
 	mailClient := mail.New(cfg)
 	repo := repository.New(db)
 	srv := service.New(repo)
@@ -52,9 +58,13 @@ func main() {
 		validate.New(repo.User, repo.Language),
 		mailClient,
 		rCache,
+		aiClient,
 		cfg.PublicURL,
 		usecase.WithLogger(log),
 	)
+
+	cron := internal.NewCron(uc, log)
+	cron.Start()
 
 	h := handler.New(
 		uc,

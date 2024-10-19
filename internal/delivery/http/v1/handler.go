@@ -53,6 +53,10 @@ func (h *Handler) InitRoutes(r *mux.Router) {
 	r.HandleFunc("/api/v1/lang", h.authenticateMiddleware(h.LanguageCreate, true)).Methods(http.MethodPost)
 	r.HandleFunc("/api/v1/langs", h.LanguageList)
 
+	//themes
+	r.HandleFunc("/api/v1/theme/{id}", h.authenticateMiddleware(h.GetTheme, false)).Methods(http.MethodGet)
+	r.HandleFunc("/api/v1/theme", h.authenticateMiddleware(h.CreateTheme, true)).Methods(http.MethodPost)
+
 	// tokens
 	r.HandleFunc("/api/v1/tokens", h.Tokens)
 }

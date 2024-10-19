@@ -11,6 +11,7 @@ type (
 		User     *user
 		Tx       *tx
 		Language *language
+		Theme    *theme
 	}
 
 	contract interface {
@@ -26,6 +27,7 @@ func New(db *sql.DB) *Repo {
 		User:     newUser(db),
 		Tx:       newTx(db),
 		Language: newLanguage(db),
+		Theme:    newTheme(db),
 	}
 }
 

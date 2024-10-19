@@ -247,3 +247,32 @@ func (v *Validator) ValidateLanguage(ctx context.Context, obj models.LanguageCU)
 
 	return mp, nil
 }
+
+func (v *Validator) ValidateTheme(ctx context.Context, obj models.ThemeCU) (map[string]RequiredField, error) {
+	mp := make(map[string]RequiredField)
+
+	if obj.Level == nil {
+		mp["level"] = RequiredField{
+			Description: ErrMissingLevel.Error(),
+		}
+	}
+
+	if obj.LanguageID == nil {
+		mp["language_id"] = RequiredField{
+			Description: ErrMissingLanguageID.Error(),
+		}
+	}
+
+	if obj.Topic == nil {
+		mp["topic"] = RequiredField{
+			Description: ErrMissingTopic.Error(),
+		}
+	}
+
+	if obj.Question == nil {
+		mp["question"] = RequiredField{
+			Description: ErrMissingQuestion.Error(),
+		}
+	}
+	return mp, nil
+}
