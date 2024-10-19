@@ -230,3 +230,20 @@ func validatePassword(password string) (err error) {
 
 	return nil
 }
+
+func (v *Validator) ValidateLanguage(ctx context.Context, obj models.LanguageCU) (map[string]RequiredField, error) {
+	mp := make(map[string]RequiredField)
+
+	if obj.ShortName == nil {
+		mp["short_name"] = RequiredField{
+			Description: ErrMissingShortName.Error(),
+		}
+	}
+	if obj.LongName == nil {
+		mp["long_name"] = RequiredField{
+			Description: ErrMissingLongName.Error(),
+		}
+	}
+
+	return mp, nil
+}

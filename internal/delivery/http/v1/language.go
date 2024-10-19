@@ -8,7 +8,7 @@ import (
 )
 
 func (h *Handler) LanguageCreate(w http.ResponseWriter, r *http.Request) {
-	var obj models.Language
+	var obj models.LanguageCU
 	err := json.NewDecoder(r.Body).Decode(&obj)
 	if err != nil {
 		h.writeError(w, err, http.StatusBadRequest)
@@ -16,7 +16,18 @@ func (h *Handler) LanguageCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.uc.LanguageCreate(r.Context(), obj.Name)
+	missed, err := h.uc.LanguageValidate(r.Context(), obj)
+	if err != nil {
+		h.writeError(w, err, http.StatusInternalServerError)
+		h.log.With("error", err).Info("can not validate language")
+		return
+	}
+	if len(missed) > 0 {
+		writeJson(w, missed, http.StatusBadRequest)
+		return
+	}
+
+	err = h.uc.LanguageCreate(r.Context(), obj)
 	if err != nil {
 		h.writeError(w, err, http.StatusInternalServerError)
 		h.log.With("error", err).Info("can not create language")
@@ -31,12 +42,16 @@ func (h *Handler) LanguageCreate(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) LanguageList(w http.ResponseWriter, r *http.Request) {
-	langs, _, err := h.uc.LanguageList(r.Context())
+	langs, count, err := h.uc.LanguageList(r.Context())
 	if err != nil {
 		h.writeError(w, err, http.StatusInternalServerError)
 		h.log.With("error", err).Info("can not list languages")
 		return
 	}
 
-	writeJson(w, langs, http.StatusOK)
+	writeJson(w, models.PaginatedResponse{
+		Result: langs,
+		Page:   1,
+		Count:  count,
+	}, http.StatusOK)
 }

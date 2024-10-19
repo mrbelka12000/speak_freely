@@ -30,4 +30,8 @@ var (
 	ErrInvalidAuthMethod = errors.New("invalid auth method")
 	ErrEmailIsUsed       = errors.New("email is used")
 	ErrNicknameIsUsed    = errors.New("nickname is used")
+
+	// Language validation
+	ErrMissingShortName = errors.New("short name not provided")
+	ErrMissingLongName  = errors.New("long name not provided")
 )

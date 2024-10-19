@@ -50,7 +50,7 @@ func (h *Handler) InitRoutes(r *mux.Router) {
 	r.HandleFunc("/api/v1/profile", h.authenticateMiddleware(h.Profile, true)).Methods(http.MethodGet)
 
 	// languages
-	r.HandleFunc("/api/v1/lang", h.LanguageCreate).Methods(http.MethodPost)
+	r.HandleFunc("/api/v1/lang", h.authenticateMiddleware(h.LanguageCreate, true)).Methods(http.MethodPost)
 	r.HandleFunc("/api/v1/langs", h.LanguageList)
 
 	// tokens

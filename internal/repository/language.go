@@ -18,8 +18,8 @@ func newLanguage(db *sql.DB) *language {
 	}
 }
 
-func (l *language) Create(ctx context.Context, name string) error {
-	_, err := l.db.ExecContext(ctx, "INSERT INTO languages (name) VALUES ($1)", name)
+func (l *language) Create(ctx context.Context, obj models.LanguageCU) error {
+	_, err := l.db.ExecContext(ctx, "INSERT INTO languages (long_name, short_name) VALUES ($1,$2)", *obj.LongName, *obj.ShortName)
 	if err != nil {
 		return fmt.Errorf("exec: %w", err)
 	}
@@ -28,7 +28,7 @@ func (l *language) Create(ctx context.Context, name string) error {
 }
 
 func (l *language) Get(ctx context.Context, id int64) (obj models.Language, err error) {
-	err = l.db.QueryRowContext(ctx, `SELECT id, name FROM languages WHERE id = $1`, id).Scan(&obj.ID, &obj.Name)
+	err = l.db.QueryRowContext(ctx, `SELECT id, short_name, long_name FROM languages WHERE id = $1`, id).Scan(&obj.ID, &obj.ShortName, &obj.LongName)
 	if err != nil {
 		return obj, fmt.Errorf("query: %w", err)
 	}
@@ -37,7 +37,7 @@ func (l *language) Get(ctx context.Context, id int64) (obj models.Language, err 
 }
 
 func (l *language) List(ctx context.Context) ([]models.Language, int, error) {
-	rows, err := l.db.QueryContext(ctx, `SELECT id, name FROM languages`)
+	rows, err := l.db.QueryContext(ctx, `SELECT id, short_name, long_name FROM languages`)
 	if err != nil {
 		return nil, 0, fmt.Errorf("query: %w", err)
 	}
@@ -47,7 +47,7 @@ func (l *language) List(ctx context.Context) ([]models.Language, int, error) {
 
 	for rows.Next() {
 		var obj models.Language
-		if err := rows.Scan(&obj.ID, &obj.Name); err != nil {
+		if err := rows.Scan(&obj.ID, &obj.ShortName, &obj.LongName); err != nil {
 			return nil, 0, fmt.Errorf("scan: %w", err)
 		}
 		objs = append(objs, obj)

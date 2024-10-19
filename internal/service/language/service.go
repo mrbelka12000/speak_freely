@@ -12,7 +12,7 @@ type (
 	}
 
 	repo interface {
-		Create(ctx context.Context, name string) error
+		Create(ctx context.Context, obj models.LanguageCU) error
 		Get(ctx context.Context, id int64) (obj models.Language, err error)
 		List(ctx context.Context) ([]models.Language, int, error)
 	}
@@ -24,8 +24,8 @@ func New(r repo) *Service {
 	}
 }
 
-func (s *Service) Create(ctx context.Context, name string) error {
-	return s.r.Create(ctx, name)
+func (s *Service) Create(ctx context.Context, obj models.LanguageCU) error {
+	return s.r.Create(ctx, obj)
 }
 
 func (s *Service) Get(ctx context.Context, id int64) (models.Language, error) {

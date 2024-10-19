@@ -45,6 +45,8 @@ type (
 		Email     *string
 		Confirmed *bool
 		Count     bool
+
+		PaginationParams
 	}
 
 	// UserGetPars
