@@ -19,9 +19,9 @@ type (
 		cache                cache
 		emailConfirmTemplate *template.Template
 		gen                  generator
-
-		log       *slog.Logger
-		publicURL string
+		storage              storage
+		log                  *slog.Logger
+		publicURL            string
 	}
 )
 
@@ -33,6 +33,7 @@ func New(
 	ms mailSender,
 	c cache,
 	gen generator,
+	s storage,
 	publicURL string,
 	opts ...opt,
 ) *UseCase {
@@ -50,8 +51,10 @@ func New(
 		cache:                c,
 		emailConfirmTemplate: t,
 		gen:                  gen,
-		log:                  log,
-		publicURL:            publicURL,
+		storage:              s,
+
+		log:       log,
+		publicURL: publicURL,
 	}
 
 	for _, opt := range opts {

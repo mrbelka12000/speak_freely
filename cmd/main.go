@@ -50,7 +50,6 @@ func main() {
 		log.With("error", err).Error("failed to connect to minio")
 		return
 	}
-	_ = minIOClient
 
 	aiClient := ai.NewClient(
 		cfg.AIToken,
@@ -67,6 +66,7 @@ func main() {
 		mailClient,
 		rCache,
 		aiClient,
+		minIOClient,
 		cfg.PublicURL,
 		usecase.WithLogger(log),
 	)

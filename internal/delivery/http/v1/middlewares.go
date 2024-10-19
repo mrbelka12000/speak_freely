@@ -26,6 +26,15 @@ func (h *Handler) recovery(next http.Handler) http.Handler {
 	})
 }
 
+func (h *Handler) cors(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+		w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding")
+		next.ServeHTTP(w, r)
+	})
+}
+
 func (h *Handler) authenticateMiddleware(next http.HandlerFunc, strict bool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tokenString := r.Header.Get("Authorization")

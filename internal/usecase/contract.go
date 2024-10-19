@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"io"
 	"time"
 
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/client/ai"
@@ -28,5 +29,9 @@ type (
 
 	generator interface {
 		GenerateTopics(ctx context.Context, request ai.GenerateTopicsRequest) ([]ai.GenerateTopicsResponse, error)
+	}
+
+	storage interface {
+		UploadFile(ctx context.Context, file io.Reader, objectName, contentType string, fileSize int64) (string, error)
 	}
 )

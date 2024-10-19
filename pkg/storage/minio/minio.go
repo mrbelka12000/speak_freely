@@ -22,7 +22,7 @@ func Connect(cfg config.Config) (*Storage, error) {
 
 	minioClient, err := minio.New(cfg.MinIOAddr, &minio.Options{
 		Creds:  credentials.NewStaticV4(cfg.MinIOAccessKey, cfg.MinIOSecretKey, ""),
-		Secure: true,
+		Secure: false,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("create minio client: %v", err)
@@ -34,7 +34,13 @@ func Connect(cfg config.Config) (*Storage, error) {
 	}, nil
 }
 
-func (s *Storage) UploadFile(ctx context.Context, file io.Reader, objectName string, fileSize int64) error {
-	s.client.PutObject(ctx, s.bucket, objectName, file, fileSize, minio.PutObjectOptions{})
-	return nil
+func (s *Storage) UploadFile(ctx context.Context, file io.Reader, objectName, contentType string, fileSize int64) (string, error) {
+	info, err := s.client.PutObject(ctx, s.bucket, objectName, file, fileSize, minio.PutObjectOptions{
+		ContentType: contentType,
+	})
+	if err != nil {
+		return "", fmt.Errorf("upload file: %v", err)
+	}
+
+	return info.Key, nil
 }
