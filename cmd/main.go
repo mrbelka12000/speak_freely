@@ -62,7 +62,7 @@ func main() {
 	uc := usecase.New(
 		srv,
 		repo.Tx,
-		validate.New(repo.User, repo.Language, repo.File),
+		validate.New(repo.User, repo.Language, repo.File, repo.Theme),
 		mailClient,
 		rCache,
 		aiClient,

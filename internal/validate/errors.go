@@ -40,7 +40,12 @@ var (
 	ErrMissingTopic    = errors.New("topic not provided")
 	ErrMissingQuestion = errors.New("question not provided")
 
-	// File validation
-	ErrMissingFileKey = errors.New("key not provided")
-	ErrFileKeyIsUsed  = errors.New("key is used")
+	// Transcript validation
+	ErrMissingThemeID = errors.New("theme id not provided")
+	ErrInvalidThemeID = errors.New("invalid theme id")
+	ErrMissingUserID  = errors.New("user id not provided")
+	ErrInvalidUserID  = errors.New("invalid user id")
+	ErrMissingFileID  = errors.New("file id not provided")
+	ErrInvalidFileID  = errors.New("file id not provided")
+	ErrMissingText    = errors.New("text not provided")
 )

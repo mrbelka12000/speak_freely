@@ -59,7 +59,8 @@ func (h *Handler) InitRoutes(r *mux.Router) {
 	r.HandleFunc("/api/v1/theme", h.authenticateMiddleware(h.CreateTheme, true)).Methods(http.MethodPost)
 
 	// transcripts
-	r.HandleFunc("/api/v1/transcript", h.TranscriptCreate)
+	r.HandleFunc("/api/v1/transcript", h.authenticateMiddleware(h.TranscriptCreate, true)).Methods(http.MethodPost)
+	r.HandleFunc("/api/v1/transcript/{id}", h.authenticateMiddleware(h.TranscriptGet, true)).Methods(http.MethodGet)
 	// tokens
 	r.HandleFunc("/api/v1/tokens", h.Tokens)
 }

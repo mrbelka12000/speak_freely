@@ -18,8 +18,8 @@ CREATE TABLE "files" (
 
 CREATE TABLE "transcripts" (
                                "id" SERIAL PRIMARY KEY,
-                               "text" TEXT NOT NULL,
-                               "accurancy" DOUBLE PRECISION,
+                               "text" TEXT default '',
+                               "accuracy" DOUBLE PRECISION,
                                "language_id" INTEGER NOT NULL,
                                "user_id" INTEGER NOT NULL,
                                "file_id" INTEGER NOT NULL,

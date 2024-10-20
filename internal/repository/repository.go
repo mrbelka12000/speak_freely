@@ -8,11 +8,12 @@ import (
 type (
 	// Repo
 	Repo struct {
-		User     *user
-		Tx       *tx
-		Language *language
-		Theme    *theme
-		File     *file
+		User       *user
+		Tx         *tx
+		Language   *language
+		Theme      *theme
+		File       *file
+		Transcript *transcript
 	}
 
 	contract interface {
@@ -25,11 +26,12 @@ type (
 // New
 func New(db *sql.DB) *Repo {
 	return &Repo{
-		User:     newUser(db),
-		Tx:       newTx(db),
-		Language: newLanguage(db),
-		Theme:    newTheme(db),
-		File:     newFile(db),
+		User:       newUser(db),
+		Tx:         newTx(db),
+		Language:   newLanguage(db),
+		Theme:      newTheme(db),
+		File:       newFile(db),
+		Transcript: newTranscript(db),
 	}
 }
 

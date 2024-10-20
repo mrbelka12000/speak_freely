@@ -11,7 +11,7 @@ type (
 )
 
 const (
-	id ctxKey = "id"
+	userObj ctxKey = "user_obj"
 )
 
 func (h *Handler) recovery(next http.Handler) http.Handler {
@@ -57,7 +57,13 @@ func (h *Handler) authenticateMiddleware(next http.HandlerFunc, strict bool) htt
 				return
 			}
 
-			r = r.WithContext(context.WithValue(r.Context(), id, claims.ID))
+			user, err := h.uc.UserGet(r.Context(), claims.ID)
+			if err != nil {
+				w.WriteHeader(http.StatusUnauthorized)
+				h.log.Error("can not get user")
+				return
+			}
+			r = r.WithContext(context.WithValue(r.Context(), userObj, user))
 		}
 
 		next.ServeHTTP(w, r)

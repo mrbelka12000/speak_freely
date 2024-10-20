@@ -12,9 +12,10 @@ import (
 
 type (
 	Validator struct {
-		ur   userRepo
-		lang langRepo
-		file fileRepo
+		user  userRepo
+		lang  langRepo
+		file  fileRepo
+		theme themeRepo
 	}
 
 	RequiredField struct {
@@ -23,11 +24,12 @@ type (
 	}
 )
 
-func New(ur userRepo, lang langRepo, file fileRepo) *Validator {
+func New(ur userRepo, lang langRepo, file fileRepo, theme themeRepo) *Validator {
 	return &Validator{
-		ur:   ur,
-		lang: lang,
-		file: file,
+		user:  ur,
+		lang:  lang,
+		file:  file,
+		theme: theme,
 	}
 }
 
@@ -35,6 +37,7 @@ func New(ur userRepo, lang langRepo, file fileRepo) *Validator {
 func (v *Validator) ValidateUser(ctx context.Context, user models.UserCU, id int64) (map[string]RequiredField, error) {
 	mp := make(map[string]RequiredField)
 
+	// firstname check
 	if user.FirstName == nil && id == -1 {
 		mp["first_name"] = RequiredField{
 			Description: ErrMissingFirstName.Error(),
@@ -54,6 +57,7 @@ func (v *Validator) ValidateUser(ctx context.Context, user models.UserCU, id int
 		}
 	}
 
+	// lastname check
 	if user.LastName == nil && id == -1 {
 		mp["last_name"] = RequiredField{
 			Description: ErrMissingLastName.Error(),
@@ -73,6 +77,7 @@ func (v *Validator) ValidateUser(ctx context.Context, user models.UserCU, id int
 		}
 	}
 
+	// email
 	if user.Email == nil && id == -1 {
 		mp["email"] = RequiredField{
 			Description: ErrMissingEmail.Error(),
@@ -98,7 +103,7 @@ func (v *Validator) ValidateUser(ctx context.Context, user models.UserCU, id int
 			}
 		}
 
-		users, count, err := v.ur.List(ctx, models.UserListPars{Email: user.Email})
+		users, count, err := v.user.List(ctx, models.UserListPars{Email: user.Email})
 		if err != nil {
 			return nil, fmt.Errorf("get user list: %w", err)
 		}
@@ -120,6 +125,7 @@ func (v *Validator) ValidateUser(ctx context.Context, user models.UserCU, id int
 		}
 	}
 
+	// nickname check
 	if user.Nickname == nil && id == -1 {
 		mp["nickname"] = RequiredField{
 			Description: ErrMissingNickname.Error(),
@@ -137,7 +143,7 @@ func (v *Validator) ValidateUser(ctx context.Context, user models.UserCU, id int
 			}
 		}
 
-		users, count, err := v.ur.List(ctx, models.UserListPars{Nickname: user.Nickname})
+		users, count, err := v.user.List(ctx, models.UserListPars{Nickname: user.Nickname})
 		if err != nil {
 			return nil, fmt.Errorf("get user list: %w", err)
 		}
@@ -158,6 +164,7 @@ func (v *Validator) ValidateUser(ctx context.Context, user models.UserCU, id int
 		}
 	}
 
+	// password check
 	if user.Password == nil && id == -1 {
 		mp["password"] = RequiredField{
 			Description: ErrMissingPassword.Error(),
@@ -177,6 +184,7 @@ func (v *Validator) ValidateUser(ctx context.Context, user models.UserCU, id int
 		}
 	}
 
+	// language check
 	if user.LanguageID == nil && id == -1 {
 		mp["language_id"] = RequiredField{
 			Description: ErrMissingLanguageID.Error(),
@@ -241,9 +249,24 @@ func (v *Validator) ValidateLanguage(ctx context.Context, obj models.LanguageCU)
 			Description: ErrMissingShortName.Error(),
 		}
 	}
+	if obj.ShortName != nil {
+		if *obj.ShortName == "" {
+			mp["short_name"] = RequiredField{
+				Description: ErrMissingShortName.Error(),
+			}
+		}
+	}
+
 	if obj.LongName == nil {
 		mp["long_name"] = RequiredField{
 			Description: ErrMissingLongName.Error(),
+		}
+	}
+	if obj.LongName != nil {
+		if *obj.LongName == "" {
+			mp["short_name"] = RequiredField{
+				Description: ErrMissingLongName.Error(),
+			}
 		}
 	}
 
@@ -253,52 +276,147 @@ func (v *Validator) ValidateLanguage(ctx context.Context, obj models.LanguageCU)
 func (v *Validator) ValidateTheme(ctx context.Context, obj models.ThemeCU) (map[string]RequiredField, error) {
 	mp := make(map[string]RequiredField)
 
+	// level check
 	if obj.Level == nil {
 		mp["level"] = RequiredField{
 			Description: ErrMissingLevel.Error(),
 		}
 	}
 
+	// language check
 	if obj.LanguageID == nil {
 		mp["language_id"] = RequiredField{
 			Description: ErrMissingLanguageID.Error(),
 		}
 	}
+	if obj.LanguageID != nil {
+		if _, err := v.lang.Get(ctx, *obj.LanguageID); err != nil {
+			mp["language_id"] = RequiredField{
+				Description: ErrInvalidLanguageID.Error(),
+			}
+		}
+	}
 
+	// topic check
 	if obj.Topic == nil {
 		mp["topic"] = RequiredField{
 			Description: ErrMissingTopic.Error(),
 		}
 	}
+	if obj.Topic != nil {
+		if *obj.Topic == "" {
+			mp["topic"] = RequiredField{
+				Description: ErrMissingTopic.Error(),
+			}
+		}
+	}
 
+	// question check
 	if obj.Question == nil {
 		mp["question"] = RequiredField{
 			Description: ErrMissingQuestion.Error(),
 		}
 	}
-	return mp, nil
-}
-
-func (v *Validator) ValidateFile(ctx context.Context, obj models.FileCU) (map[string]RequiredField, error) {
-	mp := make(map[string]RequiredField)
-
-	if obj.Key == nil {
-		mp["key"] = RequiredField{
-			Description: ErrMissingFileKey.Error(),
+	if obj.Question != nil {
+		if *obj.Question == "" {
+			mp["question"] = RequiredField{
+				Description: ErrMissingQuestion.Error(),
+			}
 		}
 	}
 
-	if obj.Key != nil {
-		if *obj.Key == "" {
-			mp["key"] = RequiredField{
-				Description: ErrMissingFileKey.Error(),
+	return mp, nil
+}
+
+func (v *Validator) ValidateTranscript(ctx context.Context, obj models.TranscriptCU, id int64) (map[string]RequiredField, error) {
+	mp := make(map[string]RequiredField)
+
+	// theme check
+	if obj.ThemeID == nil && id == -1 {
+		mp["theme_id"] = RequiredField{
+			Description: ErrMissingThemeID.Error(),
+		}
+	}
+	if obj.ThemeID != nil {
+		if *obj.ThemeID == 0 {
+			mp["theme_id"] = RequiredField{
+				Description: ErrMissingThemeID.Error(),
+			}
+		}
+		if _, err := v.theme.Get(ctx, *obj.ThemeID); err != nil {
+			mp["theme_id"] = RequiredField{
+				Description: ErrInvalidThemeID.Error(),
+			}
+		}
+	}
+
+	// language check
+	if obj.LanguageID == nil && id == -1 {
+		mp["language_id"] = RequiredField{
+			Description: ErrMissingLanguageID.Error(),
+		}
+	}
+
+	if obj.LanguageID != nil {
+		if *obj.LanguageID == 0 {
+			mp["language_id"] = RequiredField{
+				Description: ErrMissingLanguageID.Error(),
 			}
 		}
 
-		_, err := v.file.GetByKey(ctx, *obj.Key)
-		if err == nil {
-			mp["key"] = RequiredField{
-				Description: ErrFileKeyIsUsed.Error(),
+		if _, err := v.lang.Get(ctx, *obj.LanguageID); err != nil {
+			mp["language_id"] = RequiredField{
+				Description: ErrInvalidLanguageID.Error(),
+			}
+		}
+	}
+
+	// user check
+	if obj.UserID == nil && id == -1 {
+		mp["user_id"] = RequiredField{
+			Description: ErrMissingUserID.Error(),
+		}
+	}
+
+	if obj.UserID != nil {
+		if *obj.UserID == 0 {
+			mp["user_id"] = RequiredField{
+				Description: ErrMissingUserID.Error(),
+			}
+		}
+
+		if _, err := v.user.Get(ctx, *obj.UserID); err != nil {
+			mp["user_id"] = RequiredField{
+				Description: ErrInvalidUserID.Error(),
+			}
+		}
+	}
+
+	// file check
+	if obj.FileID == nil && id == -1 {
+		mp["file_id"] = RequiredField{
+			Description: ErrMissingFileID.Error(),
+		}
+	}
+	if obj.FileID != nil {
+		if *obj.FileID == 0 {
+			mp["file_id"] = RequiredField{
+				Description: ErrMissingFileID.Error(),
+			}
+		}
+
+		if _, err := v.file.Get(ctx, *obj.FileID); err != nil {
+			mp["file_id"] = RequiredField{
+				Description: ErrInvalidFileID.Error(),
+			}
+		}
+	}
+
+	// text check
+	if obj.Text != nil {
+		if *obj.Text == "" {
+			mp["text"] = RequiredField{
+				Description: ErrMissingText.Error(),
 			}
 		}
 	}

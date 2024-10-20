@@ -27,7 +27,7 @@ func NewCron(uc *usecase.UseCase, log *slog.Logger) *Cron {
 func (c *Cron) Start() {
 	s := gocron.NewScheduler(time.UTC)
 
-	s.Every(5).Minute().Do(func() {
+	s.Every(12).Hour().Do(func() {
 		c.addThemes()
 	})
 

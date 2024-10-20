@@ -91,11 +91,11 @@ func (h *Handler) ConfirmEmail(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
-	idAny := r.Context().Value(id)
-	idInt64, ok := idAny.(int64)
+	uAny := r.Context().Value(userObj)
+	user, ok := uAny.(models.User)
 	if !ok {
-		h.writeError(w, errors.New("invalid id"), http.StatusBadRequest)
-		h.log.Error("invalid id")
+		h.writeError(w, errors.New("invalid user"), http.StatusBadRequest)
+		h.log.Error("invalid user")
 		return
 	}
 
@@ -107,7 +107,7 @@ func (h *Handler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	missed, err := h.uc.UserUpdate(r.Context(), idInt64, obj)
+	missed, err := h.uc.UserUpdate(r.Context(), user.ID, obj)
 	if err != nil {
 		h.writeError(w, err, http.StatusBadRequest)
 		h.log.With("error", err).Error("can not update user")
@@ -127,15 +127,15 @@ func (h *Handler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) Profile(w http.ResponseWriter, r *http.Request) {
-	idAny := r.Context().Value(id)
-	idInt64, ok := idAny.(int64)
+	uAny := r.Context().Value(userObj)
+	user, ok := uAny.(models.User)
 	if !ok {
-		h.writeError(w, errors.New("invalid id"), http.StatusBadRequest)
-		h.log.Error("invalid id")
+		h.writeError(w, errors.New("invalid user"), http.StatusBadRequest)
+		h.log.Error("invalid user")
 		return
 	}
 
-	user, err := h.uc.UserGet(r.Context(), idInt64)
+	user, err := h.uc.UserGet(r.Context(), user.ID)
 	if err != nil {
 		h.writeError(w, err, http.StatusBadRequest)
 		h.log.With("error", err).Error("can not get user")

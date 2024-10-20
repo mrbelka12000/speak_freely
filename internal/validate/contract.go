@@ -8,6 +8,7 @@ import (
 
 type (
 	userRepo interface {
+		Get(ctx context.Context, id int64) (models.User, error)
 		List(ctx context.Context, pars models.UserListPars) ([]models.User, int, error)
 	}
 	langRepo interface {
@@ -16,5 +17,8 @@ type (
 	fileRepo interface {
 		Get(ctx context.Context, id int64) (models.File, error)
 		GetByKey(ctx context.Context, key string) (models.File, error)
+	}
+	themeRepo interface {
+		Get(ctx context.Context, id int64) (models.Theme, error)
 	}
 )

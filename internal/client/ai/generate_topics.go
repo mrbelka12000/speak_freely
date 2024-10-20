@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
-	"strings"
 )
 
 type (
@@ -35,7 +34,7 @@ Here is an example of a response:
 The level of difficulty should be %v
 Provide for all languages that I need
 Topic and question should be in the same language as "lang"
-You can choose randomly from these topics:
+Theme to discuss:
 %v
 `
 )
@@ -55,7 +54,7 @@ func (c *Client) GenerateTopics(ctx context.Context, request GenerateTopicsReque
 		Messages: []Message{
 			{
 				Role:    "user",
-				Content: fmt.Sprintf(topicsPrompt, request.Level, strings.Join(preferences, " | ")),
+				Content: fmt.Sprintf(topicsPrompt, request.Level, getRandomTopic(preferences)),
 			},
 		},
 	},
