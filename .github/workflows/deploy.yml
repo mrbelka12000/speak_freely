@@ -10,10 +10,10 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      IMAGE: transcripter_bot
-      IMAGE_TEST: transcripter_bot_test
-      SERVICE_NAME: transcripter_bot_service
-      TEST_SERVICE_NAME: transcripter_bot_service_test
+      IMAGE: linguosphere
+      IMAGE_TEST: linguosphere_test
+      SERVICE_NAME: linguosphere_service
+      TEST_SERVICE_NAME: linguosphere_service_test
 
     outputs:
       image: ${{ steps.define_env.outputs.image }}
@@ -56,7 +56,7 @@ jobs:
 
       - name: Docker build
         run: |
-          docker build -t $OWNER/${{ needs.define.outputs.image }}:latest .
+          docker build  -f build/Dockerfile -t $OWNER/${{ needs.define.outputs.image }}:latest .
 
       - name: Docker push
         run: |
@@ -68,7 +68,6 @@ jobs:
     needs: [define, dockerSetup]
     environment:
       name: production
-      url: https://t.me/chat_transcripter_bot
     steps:
       - name: Checkout 🛎
         uses: actions/checkout@master
