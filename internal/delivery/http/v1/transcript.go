@@ -134,3 +134,33 @@ func (h *Handler) TranscriptGet(w http.ResponseWriter, r *http.Request) {
 
 	writeJson(w, obj, http.StatusOK)
 }
+
+func (h *Handler) TranscriptList(w http.ResponseWriter, r *http.Request) {
+	var pars models.TranscriptListPars
+	err := h.decoder.Decode(&pars, r.URL.Query())
+	if err != nil {
+		h.writeError(w, err, http.StatusBadRequest)
+		h.log.With("error", err).Error("can not decode pars")
+		return
+	}
+
+	pars.PaginationParams, err = getPaginationParams(pars.PaginationParams)
+	if err != nil {
+		h.writeError(w, err, http.StatusBadRequest)
+		h.log.With("error", err).Error("can not get pagination params")
+		return
+	}
+
+	result, count, err := h.uc.TranscriptList(r.Context(), pars)
+	if err != nil {
+		h.writeError(w, err, http.StatusInternalServerError)
+		h.log.With("error", err).Error("failed to list transcripts")
+		return
+	}
+
+	writeJson(w, models.PaginatedResponse{
+		Result: result,
+		Page:   pars.PaginationParams.Page,
+		Count:  count,
+	}, http.StatusOK)
+}

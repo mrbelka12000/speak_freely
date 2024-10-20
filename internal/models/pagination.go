@@ -2,9 +2,9 @@ package models
 
 type (
 	PaginationParams struct {
-		Limit  int `json:"limit"`
-		Offset int `json:"offset"`
-		Page   int `json:"page"`
+		Limit  int `json:"limit" schema:"limit"`
+		Offset int `json:"offset" schema:"offset"`
+		Page   int `json:"page" schema:"page"`
 	}
 
 	PaginatedResponse struct {

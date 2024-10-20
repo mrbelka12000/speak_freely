@@ -105,6 +105,9 @@ func (u *user) List(ctx context.Context, pars models.UserListPars) ([]models.Use
 `
 	queryFrom := "FROM users"
 	queryWhere := " WHERE "
+	queryOffset := fmt.Sprintf(" OFFSET %d ", pars.Offset)
+	queryLimit := fmt.Sprintf(" LIMIT %d ", pars.Limit)
+
 	var args []any
 	if pars.ID != nil {
 		args = append(args, *pars.ID)
@@ -139,18 +142,17 @@ func (u *user) List(ctx context.Context, pars models.UserListPars) ([]models.Use
 
 	queryWhere = queryWhere[:len(queryWhere)-4] // Remove the trailing " AND"
 
-	if pars.Count {
-		var count int
+	var count int
+	err := QueryRow(ctx, u.db, "select count(*) from users "+queryWhere, args...).Scan(&count)
+	if err != nil {
+		return nil, 0, fmt.Errorf("count users: %w", err)
+	}
 
-		err := QueryRow(ctx, u.db, "select count(*) from users "+queryWhere, args...).Scan(&count)
-		if err != nil {
-			return nil, 0, fmt.Errorf("count users: %w", err)
-		}
-
+	if pars.OnlyCount {
 		return nil, count, err
 	}
 
-	rows, err := Query(ctx, u.db, querySelect+queryFrom+queryWhere, args...)
+	rows, err := Query(ctx, u.db, querySelect+queryFrom+queryWhere+queryOffset+queryLimit, args...)
 	if err != nil {
 		return nil, 0, fmt.Errorf("list users: %w", err)
 	}
@@ -181,7 +183,7 @@ func (u *user) List(ctx context.Context, pars models.UserListPars) ([]models.Use
 		return nil, 0, fmt.Errorf("rows error: %w", err)
 	}
 
-	return users, len(users), nil
+	return users, count, nil
 }
 
 // Update

@@ -80,3 +80,7 @@ func (uc *UseCase) ThemesGenerateWithAI(ctx context.Context, level string) error
 
 	return nil
 }
+
+func (uc *UseCase) ThemeList(ctx context.Context, pars models.ThemeListPars) ([]models.Theme, int, error) {
+	return uc.srv.Theme.List(ctx, pars)
+}

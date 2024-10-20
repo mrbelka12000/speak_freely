@@ -89,3 +89,7 @@ func (uc *UseCase) TranscriptGet(ctx context.Context, id int64, user models.User
 
 	return obj, nil
 }
+
+func (uc *UseCase) TranscriptList(ctx context.Context, pars models.TranscriptListPars) ([]models.Transcript, int, error) {
+	return uc.srv.Transcript.List(ctx, pars)
+}

@@ -7,14 +7,16 @@ import (
 	"os"
 
 	"github.com/gorilla/mux"
+	"github.com/gorilla/schema"
 
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/usecase"
 )
 
 type (
 	Handler struct {
-		uc  *usecase.UseCase
-		log *slog.Logger
+		uc      *usecase.UseCase
+		log     *slog.Logger
+		decoder *schema.Decoder
 	}
 )
 
@@ -27,8 +29,9 @@ func New(uc *usecase.UseCase, opts ...opt) *Handler {
 	secretKey = []byte(key)
 
 	h := &Handler{
-		uc:  uc,
-		log: slog.New(slog.NewJSONHandler(os.Stdout, nil)),
+		uc:      uc,
+		log:     slog.New(slog.NewJSONHandler(os.Stdout, nil)),
+		decoder: schema.NewDecoder(),
 	}
 
 	for _, opt := range opts {
@@ -49,6 +52,7 @@ func (h *Handler) InitRoutes(r *mux.Router) {
 	r.HandleFunc("/api/v1/confirm", h.ConfirmEmail)
 	r.HandleFunc("/api/v1/profile", h.authenticateMiddleware(h.UpdateProfile, true)).Methods(http.MethodPut)
 	r.HandleFunc("/api/v1/profile", h.authenticateMiddleware(h.Profile, true)).Methods(http.MethodGet)
+	r.HandleFunc("/api/v1/users", h.authenticateMiddleware(h.UsersList, true)).Methods(http.MethodGet)
 
 	// languages
 	r.HandleFunc("/api/v1/lang", h.authenticateMiddleware(h.LanguageCreate, true)).Methods(http.MethodPost)
@@ -57,10 +61,13 @@ func (h *Handler) InitRoutes(r *mux.Router) {
 	//themes
 	r.HandleFunc("/api/v1/theme/{id}", h.authenticateMiddleware(h.GetTheme, false)).Methods(http.MethodGet)
 	r.HandleFunc("/api/v1/theme", h.authenticateMiddleware(h.CreateTheme, true)).Methods(http.MethodPost)
+	r.HandleFunc("/api/v1/theme", h.ThemesList).Methods(http.MethodGet)
 
 	// transcripts
 	r.HandleFunc("/api/v1/transcript", h.authenticateMiddleware(h.TranscriptCreate, true)).Methods(http.MethodPost)
 	r.HandleFunc("/api/v1/transcript/{id}", h.authenticateMiddleware(h.TranscriptGet, true)).Methods(http.MethodGet)
+	r.HandleFunc("/api/v1/transcript", h.TranscriptList).Methods(http.MethodGet)
+
 	// tokens
 	r.HandleFunc("/api/v1/tokens", h.Tokens)
 }

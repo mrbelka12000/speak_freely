@@ -38,13 +38,13 @@ type (
 
 	// UserListPars for list users
 	UserListPars struct {
-		ID        *int64
-		FirstName *string
-		LastName  *string
-		Nickname  *string
-		Email     *string
-		Confirmed *bool
-		Count     bool
+		ID        *int64  `json:"id,omitempty" schema:"id"`
+		FirstName *string `json:"first_name,omitempty" schema:"first_name"`
+		LastName  *string `json:"last_name,omitempty" schema:"last_name"`
+		Nickname  *string `json:"nickname,omitempty" schema:"nickname"`
+		Email     *string `json:"email,omitempty" schema:"email"`
+		Confirmed *bool   `json:"confirmed,omitempty" schema:"confirmed"`
+		OnlyCount bool    `json:"only_count,omitempty" schema:"only_count"`
 
 		PaginationParams
 	}

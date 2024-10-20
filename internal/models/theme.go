@@ -20,11 +20,11 @@ type (
 	}
 
 	ThemeListPars struct {
-		ID         *int64
-		LanguageID *int64
-		Level      *string
+		ID         *int64  `json:"id,omitempty" schema:"id"`
+		LanguageID *int64  `json:"language_id,omitempty" schema:"language_id"`
+		Level      *string `json:"level,omitempty" schema:"level"`
 
-		OnlyCount bool
-		PaginationParams
+		OnlyCount        bool `json:"only_count,omitempty" schema:"only_count"`
+		PaginationParams `json:"pagination_params"`
 	}
 )

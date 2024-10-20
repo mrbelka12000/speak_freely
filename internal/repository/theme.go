@@ -76,6 +76,8 @@ func (t *theme) List(ctx context.Context, pars models.ThemeListPars) ([]models.T
 `
 	queryFrom := "FROM themes"
 	queryWhere := " WHERE "
+	queryOffset := fmt.Sprintf(" OFFSET %d ", pars.Offset)
+	queryLimit := fmt.Sprintf(" LIMIT %d ", pars.Limit)
 
 	var args []any
 	if pars.ID != nil {
@@ -92,17 +94,18 @@ func (t *theme) List(ctx context.Context, pars models.ThemeListPars) ([]models.T
 		args = append(args, *pars.LanguageID)
 		queryWhere += fmt.Sprintf(" language_id = $%v AND", len(args))
 	}
+	queryWhere = queryWhere[:len(queryWhere)-4] // Remove the trailing " AND"
 
+	var count int
+	err := QueryRow(ctx, t.db, "select count(*) from themes "+queryWhere, args...).Scan(&count)
+	if err != nil {
+		return nil, 0, fmt.Errorf("count users: %w", err)
+	}
 	if pars.OnlyCount {
-		var count int
-		err := QueryRow(ctx, t.db, "select count(*) from themes "+queryWhere, args...).Scan(&count)
-		if err != nil {
-			return nil, 0, fmt.Errorf("count users: %w", err)
-		}
 		return nil, count, nil
 	}
 
-	rows, err := Query(ctx, t.db, querySelect+queryFrom+queryWhere, args...)
+	rows, err := Query(ctx, t.db, querySelect+queryFrom+queryWhere+queryOffset+queryLimit, args...)
 	if err != nil {
 		return nil, 0, fmt.Errorf("list users: %w", err)
 	}
@@ -129,5 +132,5 @@ func (t *theme) List(ctx context.Context, pars models.ThemeListPars) ([]models.T
 		return nil, 0, fmt.Errorf("rows error: %w", err)
 	}
 
-	return themes, len(themes), nil
+	return themes, count, nil
 }

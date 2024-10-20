@@ -91,6 +91,8 @@ func (t *transcript) List(ctx context.Context, pars models.TranscriptListPars) (
 `
 	queryFrom := "FROM transcripts"
 	queryWhere := " WHERE "
+	queryOffset := fmt.Sprintf(" OFFSET %d ", pars.Offset)
+	queryLimit := fmt.Sprintf(" LIMIT %d ", pars.Limit)
 
 	var args []any
 	if pars.ID != nil {
@@ -115,18 +117,18 @@ func (t *transcript) List(ctx context.Context, pars models.TranscriptListPars) (
 
 	queryWhere = queryWhere[:len(queryWhere)-4] // Remove the trailing " AND"
 
+	var count int
+
+	err := QueryRow(ctx, t.db, "select count(*) from transcripts "+queryWhere, args...).Scan(&count)
+	if err != nil {
+		return nil, 0, fmt.Errorf("count users: %w", err)
+	}
+
 	if pars.OnlyCount {
-		var count int
-
-		err := QueryRow(ctx, t.db, "select count(*) from transcripts "+queryWhere, args...).Scan(&count)
-		if err != nil {
-			return nil, 0, fmt.Errorf("count users: %w", err)
-		}
-
 		return nil, count, err
 	}
 
-	rows, err := Query(ctx, t.db, querySelect+queryFrom+queryWhere, args...)
+	rows, err := Query(ctx, t.db, querySelect+queryFrom+queryWhere+queryOffset+queryLimit, args...)
 	if err != nil {
 		return nil, 0, fmt.Errorf("list users: %w", err)
 	}
@@ -150,7 +152,7 @@ func (t *transcript) List(ctx context.Context, pars models.TranscriptListPars) (
 		result = append(result, obj)
 	}
 
-	return result, len(result), nil
+	return result, count, nil
 }
 
 // Update

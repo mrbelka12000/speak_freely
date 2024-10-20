@@ -144,3 +144,34 @@ func (h *Handler) Profile(w http.ResponseWriter, r *http.Request) {
 
 	writeJson(w, user, http.StatusOK)
 }
+
+func (h *Handler) UsersList(w http.ResponseWriter, r *http.Request) {
+
+	var pars models.UserListPars
+	err := h.decoder.Decode(&pars, r.URL.Query())
+	if err != nil {
+		h.writeError(w, err, http.StatusBadRequest)
+		h.log.With("error", err).Error("can not decode pars")
+		return
+	}
+
+	pars.PaginationParams, err = getPaginationParams(pars.PaginationParams)
+	if err != nil {
+		h.writeError(w, err, http.StatusBadRequest)
+		h.log.With("error", err).Error("can not get pagination params")
+		return
+	}
+
+	result, count, err := h.uc.UserList(r.Context(), pars)
+	if err != nil {
+		h.writeError(w, err, http.StatusInternalServerError)
+		h.log.With("error", err).Error("can not get users")
+		return
+	}
+
+	writeJson(w, models.PaginatedResponse{
+		Result: result,
+		Page:   pars.PaginationParams.Page,
+		Count:  count,
+	}, http.StatusOK)
+}

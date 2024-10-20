@@ -12,22 +12,22 @@ type (
 	}
 
 	TranscriptCU struct {
-		Text       *string
-		LanguageID *int64
-		UserID     *int64
-		FileID     *int64
-		ThemeID    *int64
-		Accuracy   *float64
+		Text       *string  `json:"text,omitempty"`
+		LanguageID *int64   `json:"language_id,omitempty"`
+		UserID     *int64   `json:"user_id,omitempty"`
+		FileID     *int64   `json:"file_id,omitempty"`
+		ThemeID    *int64   `json:"theme_id,omitempty"`
+		Accuracy   *float64 `json:"accuracy,omitempty"`
 	}
 
 	TranscriptListPars struct {
-		ID         *int64
-		LanguageID *int64
-		UserID     *int64
-		ThemeID    *int64
+		ID         *int64 `json:"id,omitempty" schema:"id"`
+		LanguageID *int64 `json:"language_id,omitempty" schema:"language_id"`
+		UserID     *int64 `json:"user_id,omitempty" schema:"user_id"`
+		ThemeID    *int64 `json:"theme_id,omitempty" schema:"theme_id"`
 
-		OnlyCount bool
+		OnlyCount bool `json:"only_count,omitempty" schema:"only_count"`
 
-		PaginationParams
+		PaginationParams `json:"pagination_params"`
 	}
 )
