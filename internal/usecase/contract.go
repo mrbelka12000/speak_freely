@@ -34,4 +34,8 @@ type (
 	storage interface {
 		UploadFile(ctx context.Context, file io.Reader, objectName, contentType string, fileSize int64) (string, error)
 	}
+
+	transcriber interface {
+		GetTextFromFile(ctx context.Context, file io.Reader, lang string) (string, error)
+	}
 )

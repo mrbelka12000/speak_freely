@@ -11,6 +11,7 @@ import (
 
 	"github.com/mrbelka12000/linguo_sphere_backend/internal"
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/client/ai"
+	"github.com/mrbelka12000/linguo_sphere_backend/internal/client/assembly"
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/client/mail"
 	handler "github.com/mrbelka12000/linguo_sphere_backend/internal/delivery/http/v1"
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/repository"
@@ -51,6 +52,7 @@ func main() {
 		return
 	}
 
+	assemblyClient := assembly.New(cfg.AssemblyKey)
 	aiClient := ai.NewClient(
 		cfg.AIToken,
 		ai.WithLogger(log),
@@ -67,6 +69,7 @@ func main() {
 		rCache,
 		aiClient,
 		minIOClient,
+		assemblyClient,
 		cfg.PublicURL,
 		usecase.WithLogger(log),
 	)

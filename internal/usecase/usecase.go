@@ -20,7 +20,9 @@ type (
 		emailConfirmTemplate *template.Template
 		gen                  generator
 		storage              storage
-		log                  *slog.Logger
+		transcriber          transcriber
+
+		log *slog.Logger
 
 		publicURL string
 		minIOURL  string
@@ -36,10 +38,11 @@ func New(
 	c cache,
 	gen generator,
 	s storage,
+	t transcriber,
 	publicURL string,
 	opts ...opt,
 ) *UseCase {
-	t, err := template.ParseFiles("templates/email_confirmation.html")
+	tmpl, err := template.ParseFiles("templates/email_confirmation.html")
 	if err != nil {
 		panic(err)
 	}
@@ -51,9 +54,10 @@ func New(
 		validator:            v,
 		mailSender:           ms,
 		cache:                c,
-		emailConfirmTemplate: t,
+		emailConfirmTemplate: tmpl,
 		gen:                  gen,
 		storage:              s,
+		transcriber:          t,
 
 		log:       log,
 		publicURL: publicURL,

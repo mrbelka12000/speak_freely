@@ -22,6 +22,7 @@ func newTranscript(db *sql.DB) *transcript {
 func (t *transcript) Create(ctx context.Context, obj models.TranscriptCU) (id int64, err error) {
 	err = QueryRow(ctx, t.db, `
 	INSERT INTO transcripts(
+		text,
 		language_id,
 		user_id,
 		file_id,
@@ -30,9 +31,11 @@ func (t *transcript) Create(ctx context.Context, obj models.TranscriptCU) (id in
 	    $1,
 		$2,
 		$3,
-		$4
+		$4,
+	    $5
 	) RETURNING id
 `,
+		*obj.Text,
 		*obj.LanguageID,
 		*obj.UserID,
 		*obj.FileID,

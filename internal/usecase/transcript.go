@@ -1,10 +1,10 @@
 package usecase
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"fmt"
+	"io"
 
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/models"
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/validate"
@@ -13,7 +13,7 @@ import (
 
 func (uc *UseCase) TranscriptBuild(
 	ctx context.Context,
-	b *bytes.Buffer,
+	file io.Reader,
 	objectName,
 	contentType string,
 	fileSize int64,
@@ -29,16 +29,27 @@ func (uc *UseCase) TranscriptBuild(
 
 	fileID, err := uc.SaveFile(
 		ctx,
-		b,
+		file,
 		objectName,
 		contentType,
 		fileSize,
 	)
 	if err != nil {
-		return 0, nil, err
+		return 0, nil, fmt.Errorf("save file: %w", err)
+	}
+
+	lang, err := uc.srv.Language.Get(ctx, languageID)
+	if err != nil {
+		return 0, nil, fmt.Errorf("get language: %w", err)
+	}
+
+	text, err := uc.transcriber.GetTextFromFile(ctx, file, lang.ShortName)
+	if err != nil {
+		return 0, nil, fmt.Errorf("get text: %w", err)
 	}
 
 	obj := models.TranscriptCU{
+		Text:       pointer.Of(text),
 		LanguageID: pointer.Of(languageID),
 		UserID:     pointer.Of(userID),
 		FileID:     pointer.Of(fileID),

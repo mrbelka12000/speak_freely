@@ -1,11 +1,9 @@
 package v1
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"strconv"
 
@@ -48,10 +46,10 @@ func (h *Handler) TranscriptCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var buf bytes.Buffer
-	if _, err := io.Copy(&buf, file); err != nil {
+	f, err := handler.Open()
+	if err != nil {
 		h.writeError(w, err, http.StatusBadRequest)
-		h.log.With("error", err).Error("failed to copy file to buffer")
+		h.log.With("error", err).Error("failed to get file from handler")
 		return
 	}
 
@@ -85,7 +83,7 @@ func (h *Handler) TranscriptCreate(w http.ResponseWriter, r *http.Request) {
 
 	id, missed, err := h.uc.TranscriptBuild(
 		context.WithoutCancel(r.Context()),
-		&buf,
+		f,
 		handler.Filename,
 		handler.Header.Get("Content-Type"),
 		handler.Size,

@@ -1,9 +1,9 @@
 package usecase
 
 import (
-	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"time"
 
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/models"
@@ -13,14 +13,14 @@ import (
 // SaveFile
 func (uc *UseCase) SaveFile(
 	ctx context.Context,
-	b *bytes.Buffer,
+	file io.Reader,
 	objectName,
 	contentType string,
 	fileSize int64,
 ) (int64, error) {
 	objectName = fmt.Sprintf("%d-%s", time.Now().UnixMilli(), objectName)
 
-	fileKey, err := uc.storage.UploadFile(ctx, b, objectName, contentType, fileSize)
+	fileKey, err := uc.storage.UploadFile(ctx, file, objectName, contentType, fileSize)
 	if err != nil {
 		return 0, fmt.Errorf("upload file to storage: %w", err)
 	}

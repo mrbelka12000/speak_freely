@@ -416,7 +416,7 @@ func (v *Validator) ValidateTranscript(ctx context.Context, obj models.Transcrip
 	if obj.Text != nil {
 		if *obj.Text == "" {
 			mp["text"] = RequiredField{
-				Description: ErrMissingText.Error(),
+				Description: ErrNoMatchingWordsInLanguage.Error(),
 			}
 		}
 	}
