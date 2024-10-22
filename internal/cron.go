@@ -35,7 +35,6 @@ func (c *Cron) Start() {
 }
 
 func (c *Cron) addThemes() {
-	return
 	for _, level := range []string{"A1", "A2", "B1", "B2", "C1"} {
 		err := c.uc.ThemesGenerateWithAI(context.Background(), level)
 		if err != nil {

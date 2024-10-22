@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 
@@ -14,13 +15,21 @@ import (
 	"github.com/mrbelka12000/linguo_sphere_backend/pkg/pointer"
 )
 
-type handler struct {
-	uc  *usecase.UseCase
-	log *slog.Logger
+type (
+	handler struct {
+		uc  *usecase.UseCase
+		log *slog.Logger
 
-	bot *tgbotapi.BotAPI
-	ch  tgbotapi.UpdatesChannel
-}
+		bot *tgbotapi.BotAPI
+		ch  tgbotapi.UpdatesChannel
+	}
+
+	cache interface {
+		Set(key string, value interface{}, dur time.Duration) error
+		GetInt64(key string) (int64, bool)
+		GetInt(key string) (int, bool)
+	}
+)
 
 func Start(cfg config.Config, uc *usecase.UseCase, log *slog.Logger) error {
 
@@ -57,6 +66,7 @@ func (h *handler) handleUpdate() {
 			)
 			continue
 		}
+
 		if update.Message == nil {
 			continue
 		}
@@ -84,18 +94,24 @@ func (h *handler) handleUpdate() {
 					h.handleSendMessageError(h.bot.Send(tgbotapi.NewMessage(msg.Chat.ID, "something went wrong")))
 					return
 				}
-			}
 
-			toSendMsg := tgbotapi.NewMessage(msg.Chat.ID, "Which language you want to learn?")
-			lMarkup, err := h.getLanguages()
-			if err != nil {
-				h.log.With("error", err).Error("get languages")
-				h.handleSendMessageError(h.bot.Send(tgbotapi.NewMessage(msg.Chat.ID, "something went wrong")))
-				continue
-			}
+				toSendMsg := tgbotapi.NewMessage(msg.Chat.ID, "Which language do you want to learn?")
+				lMarkup, err := h.getLanguages()
+				if err != nil {
+					h.log.With("error", err).Error("get languages")
+					h.handleSendMessageError(h.bot.Send(tgbotapi.NewMessage(msg.Chat.ID, "something went wrong")))
+					continue
+				}
 
-			toSendMsg.ReplyMarkup = lMarkup
-			h.handleSendMessageError(h.bot.Send(toSendMsg))
+				toSendMsg.ReplyMarkup = lMarkup
+				h.handleSendMessageError(h.bot.Send(toSendMsg))
+			} else {
+				h.handleSendMessageError(
+					h.bot.Send(
+						tgbotapi.NewMessage(msg.Chat.ID, fmt.Sprintf("Hello %s, let`s start to practice.", msg.From.UserName)),
+					),
+				)
+			}
 
 		case "language":
 			lMarkup, err := h.getLanguages()
@@ -105,7 +121,7 @@ func (h *handler) handleUpdate() {
 				continue
 			}
 
-			toSendMsg := tgbotapi.NewMessage(msg.Chat.ID, "Which language you want to learn?")
+			toSendMsg := tgbotapi.NewMessage(msg.Chat.ID, "Which language do you want to learn?")
 			toSendMsg.ReplyMarkup = lMarkup
 			h.handleSendMessageError(h.bot.Send(toSendMsg))
 		}

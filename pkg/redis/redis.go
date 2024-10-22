@@ -53,6 +53,21 @@ func (c *Cache) Get(key string) (string, bool) {
 	return value, true
 }
 
+// Get
+func (c *Cache) GetInt(key string) (int, bool) {
+	strValue, err := c.store.Get(key).Result()
+	if err != nil {
+		return -1, false
+	}
+
+	value, err := strconv.Atoi(strValue)
+	if err != nil {
+		return -1, false
+	}
+
+	return value, true
+}
+
 // GetInt64
 func (c *Cache) GetInt64(key string) (int64, bool) {
 	strValue, ok := c.Get(key)
