@@ -7,6 +7,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	lsb "github.com/mrbelka12000/linguo_sphere_backend"
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/models"
 )
 
@@ -35,6 +36,50 @@ func New(ur userRepo, lang langRepo, file fileRepo, theme themeRepo) *Validator 
 
 // ValidateUser validates create and update of users information
 func (v *Validator) ValidateUser(ctx context.Context, user models.UserCU, id int64) (map[string]RequiredField, error) {
+	switch user.AuthMethod {
+	case lsb.AuthMethodWeb:
+		return v.validateFromWeb(ctx, user, id)
+	case lsb.AuthMethodTG:
+		return nil, nil
+	default:
+		return nil, ErrInvalidAuthMethod
+	}
+}
+
+func validatePassword(password string) (err error) {
+	var (
+		anyNum    bool
+		anyLetter bool
+	)
+
+	for _, c := range password {
+		if unicode.IsSymbol(c) || unicode.IsPunct(c) || unicode.IsSpace(c) {
+			return ErrInvalidPassword
+		}
+		if unicode.IsLetter(c) {
+			anyLetter = true
+		}
+		if unicode.IsNumber(c) {
+			anyNum = true
+		}
+	}
+
+	if anyLetter && anyNum {
+		return nil
+	}
+
+	if !anyLetter {
+		return ErrNeedLetter
+	}
+
+	if !anyNum {
+		return ErrNeedNumber
+	}
+
+	return nil
+}
+
+func (v *Validator) validateFromWeb(ctx context.Context, user models.UserCU, id int64) (map[string]RequiredField, error) {
 	mp := make(map[string]RequiredField)
 
 	// firstname check
@@ -208,34 +253,62 @@ func (v *Validator) ValidateUser(ctx context.Context, user models.UserCU, id int
 	return mp, nil
 }
 
-func validatePassword(password string) (err error) {
-	var (
-		anyNum    bool
-		anyLetter bool
-	)
+func (v *Validator) validateFromTg(ctx context.Context, user models.UserCU, id int64) error {
+	// firstname check
+	if user.FirstName == nil && id == -1 {
+		return ErrMissingFirstName
+	}
+	if user.FirstName != nil {
+		if *user.FirstName == "" {
+			return ErrMissingFirstName
+		}
 
-	for _, c := range password {
-		if unicode.IsSymbol(c) || unicode.IsPunct(c) || unicode.IsSpace(c) {
-			return ErrInvalidPassword
-		}
-		if unicode.IsLetter(c) {
-			anyLetter = true
-		}
-		if unicode.IsNumber(c) {
-			anyNum = true
+		if utf8.RuneCountInString(*user.FirstName) > 50 {
+			return ErrFirstNameTooLong
 		}
 	}
 
-	if anyLetter && anyNum {
-		return nil
+	// lastname check
+	if user.LastName == nil && id == -1 {
+		return ErrMissingLastName
+	}
+	if user.LastName != nil {
+		if *user.LastName == "" {
+			return ErrMissingLastName
+		}
+
+		if utf8.RuneCountInString(*user.LastName) > 50 {
+			return ErrLastNameTooLong
+		}
 	}
 
-	if !anyLetter {
-		return ErrNeedLetter
+	// nickname check
+	if user.Nickname == nil && id == -1 {
+		return ErrMissingNickname
 	}
+	if user.Nickname != nil {
+		if *user.Nickname == "" {
+			return ErrMissingNickname
+		}
+		if utf8.RuneCountInString(*user.Nickname) > 50 {
+			return ErrNicknameTooLong
+		}
 
-	if !anyNum {
-		return ErrNeedNumber
+		users, count, err := v.user.List(ctx, models.UserListPars{Nickname: user.Nickname})
+		if err != nil {
+			return fmt.Errorf("get user list: %w", err)
+		}
+		if id == -1 {
+			if count > 0 {
+				return ErrNicknameIsUsed
+			}
+		} else {
+			for _, user := range users {
+				if user.ID != id {
+					return ErrNicknameIsUsed
+				}
+			}
+		}
 	}
 
 	return nil
@@ -385,7 +458,7 @@ func (v *Validator) ValidateTranscript(ctx context.Context, obj models.Transcrip
 			}
 		}
 
-		if _, err := v.user.Get(ctx, *obj.UserID); err != nil {
+		if _, err := v.user.Get(ctx, models.UserGet{ID: *obj.UserID}); err != nil {
 			mp["user_id"] = RequiredField{
 				Description: ErrInvalidUserID.Error(),
 			}

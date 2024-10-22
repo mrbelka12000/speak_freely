@@ -17,6 +17,7 @@ type (
 		SMTPConfig
 		RedisConfig
 		MinIOConfig
+		TelegramConfig
 	}
 
 	InstanceConfig struct {
@@ -53,6 +54,10 @@ type (
 		MinIOBucket    string `env:"MINIO_BUCKET,default=linguo_sphere"`
 		MinIOAccessKey string `env:"MINIO_ACCESS_KEY,required"`
 		MinIOSecretKey string `env:"MINIO_SECRET_KEY,required"`
+	}
+
+	TelegramConfig struct {
+		BotToken string `env:"BOT_TOKEN,required"`
 	}
 )
 

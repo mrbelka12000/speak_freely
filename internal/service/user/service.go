@@ -7,7 +7,9 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
+	lsb "github.com/mrbelka12000/linguo_sphere_backend"
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/models"
+	"github.com/mrbelka12000/linguo_sphere_backend/pkg/pointer"
 )
 
 type (
@@ -18,10 +20,10 @@ type (
 
 	repo interface {
 		Create(ctx context.Context, user models.UserCU) (int64, error)
-		Get(ctx context.Context, id int64) (models.User, error)
-		Update(ctx context.Context, id int64, user models.UserCU) error
+		Get(ctx context.Context, obj models.UserGet) (models.User, error)
+		Update(ctx context.Context, obj models.UserGet, user models.UserCU) error
 		List(ctx context.Context, pars models.UserListPars) ([]models.User, int, error)
-		Delete(ctx context.Context, id int64) error
+		Delete(ctx context.Context, obj models.UserGet) error
 		FindByLogin(ctx context.Context, login string) (out models.User, err error)
 	}
 )
@@ -37,23 +39,26 @@ func New(r repo) *Service {
 // Create
 func (s *Service) Create(ctx context.Context, user models.UserCU) (int64, error) {
 	user.CreatedAt = time.Now().Unix()
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(*user.Password), s.bcryptCost)
-	if err != nil {
-		return 0, fmt.Errorf("failed to hash password: %w", err)
+
+	if user.AuthMethod == lsb.AuthMethodWeb {
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(pointer.Value(user.Password)), s.bcryptCost)
+		if err != nil {
+			return 0, fmt.Errorf("failed to hash password: %w", err)
+		}
+		user.Password = pointer.Of(string(hashedPassword))
 	}
-	*user.Password = string(hashedPassword)
 
 	return s.r.Create(ctx, user)
 }
 
 // Get
-func (s *Service) Get(ctx context.Context, id int64) (models.User, error) {
-	return s.r.Get(ctx, id)
+func (s *Service) Get(ctx context.Context, pars models.UserGet) (models.User, error) {
+	return s.r.Get(ctx, pars)
 }
 
 // Update
-func (s *Service) Update(ctx context.Context, id int64, user models.UserCU) error {
-	return s.r.Update(ctx, id, user)
+func (s *Service) Update(ctx context.Context, pars models.UserGet, user models.UserCU) error {
+	return s.r.Update(ctx, pars, user)
 }
 
 // List
@@ -62,8 +67,8 @@ func (s *Service) List(ctx context.Context, pars models.UserListPars) ([]models.
 }
 
 // Delete
-func (s *Service) Delete(ctx context.Context, id int64) error {
-	return s.r.Delete(ctx, id)
+func (s *Service) Delete(ctx context.Context, pars models.UserGet) error {
+	return s.r.Delete(ctx, pars)
 }
 
 // Login

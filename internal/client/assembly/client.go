@@ -32,3 +32,16 @@ func (c *Client) GetTextFromFile(ctx context.Context, file io.Reader, lang strin
 
 	return aai.ToString(resp.Text), nil
 }
+
+func (c *Client) GetTextFromURL(ctx context.Context, url, languageCode string) (string, error) {
+	params := aai.TranscriptOptionalParams{
+		LanguageCode: aai.TranscriptLanguageCode(languageCode),
+	}
+
+	transcript, err := c.client.Transcripts.TranscribeFromURL(ctx, url, &params)
+	if err != nil {
+		return "", err
+	}
+
+	return aai.ToString(transcript.Text), nil
+}

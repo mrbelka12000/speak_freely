@@ -107,7 +107,9 @@ func (h *Handler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	missed, err := h.uc.UserUpdate(r.Context(), user.ID, obj)
+	missed, err := h.uc.UserUpdate(r.Context(), models.UserGet{
+		ID: user.ID,
+	}, obj)
 	if err != nil {
 		h.writeError(w, err, http.StatusBadRequest)
 		h.log.With("error", err).Error("can not update user")
@@ -135,7 +137,7 @@ func (h *Handler) Profile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.uc.UserGet(r.Context(), user.ID)
+	user, err := h.uc.UserGet(r.Context(), models.UserGet{ID: user.ID})
 	if err != nil {
 		h.writeError(w, err, http.StatusBadRequest)
 		h.log.With("error", err).Error("can not get user")

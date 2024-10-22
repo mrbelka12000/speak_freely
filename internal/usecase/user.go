@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	lsb "github.com/mrbelka12000/linguo_sphere_backend"
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/models"
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/validate"
 )
@@ -23,13 +24,15 @@ func (uc *UseCase) UserCreate(ctx context.Context, user models.UserCU) (int64, m
 		return 0, nil, fmt.Errorf("create user: %w", err)
 	}
 
-	go uc.sendConfirmationEmail(context.WithoutCancel(ctx), id)
+	if user.AuthMethod == lsb.AuthMethodWeb {
+		go uc.sendConfirmationEmail(context.WithoutCancel(ctx), id)
+	}
 	return id, nil, nil
 }
 
 // UserUpdate
-func (uc *UseCase) UserUpdate(ctx context.Context, id int64, user models.UserCU) (map[string]validate.RequiredField, error) {
-	missed, err := uc.validator.ValidateUser(ctx, user, id)
+func (uc *UseCase) UserUpdate(ctx context.Context, pars models.UserGet, user models.UserCU) (map[string]validate.RequiredField, error) {
+	missed, err := uc.validator.ValidateUser(ctx, user, pars.ID)
 	if err != nil {
 		return nil, fmt.Errorf("validate user: %w", err)
 	}
@@ -37,7 +40,7 @@ func (uc *UseCase) UserUpdate(ctx context.Context, id int64, user models.UserCU)
 		return missed, nil
 	}
 
-	err = uc.srv.User.Update(ctx, id, user)
+	err = uc.srv.User.Update(ctx, pars, user)
 	if err != nil {
 		return nil, fmt.Errorf("update user: %w", err)
 	}
@@ -46,8 +49,8 @@ func (uc *UseCase) UserUpdate(ctx context.Context, id int64, user models.UserCU)
 }
 
 // UserGet
-func (uc *UseCase) UserGet(ctx context.Context, id int64) (models.User, error) {
-	user, err := uc.srv.User.Get(ctx, id)
+func (uc *UseCase) UserGet(ctx context.Context, pars models.UserGet) (models.User, error) {
+	user, err := uc.srv.User.Get(ctx, pars)
 	if err != nil {
 		return models.User{}, fmt.Errorf("get user: %w", err)
 	}
@@ -67,8 +70,8 @@ func (uc *UseCase) UserList(ctx context.Context, pars models.UserListPars) ([]mo
 }
 
 // UserDelete
-func (uc *UseCase) UserDelete(ctx context.Context, id int64) error {
-	return uc.srv.User.Delete(ctx, id)
+func (uc *UseCase) UserDelete(ctx context.Context, pars models.UserGet) error {
+	return uc.srv.User.Delete(ctx, pars)
 }
 
 // UserLogin

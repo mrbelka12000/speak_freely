@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/models"
+	"github.com/mrbelka12000/linguo_sphere_backend/pkg/pointer"
 )
 
 type user struct {
@@ -29,7 +30,8 @@ func (u *user) Create(ctx context.Context, user models.UserCU) (id int64, err er
 			password,
 			auth_method,
 			language_id,
-			created_at
+			created_at,
+		    external_id
 			) 
 		VALUES(
 			$1,
@@ -39,16 +41,18 @@ func (u *user) Create(ctx context.Context, user models.UserCU) (id int64, err er
 			$5,
 			$6,
 		 	$7,
-		    $8
+		    $8,
+		    $9
 		) RETURNING id`,
-		*user.FirstName,
-		*user.LastName,
-		*user.Nickname,
-		*user.Email,
-		*user.Password,
-		*user.AuthMethod,
-		*user.LanguageID,
+		pointer.Value(user.FirstName),
+		pointer.Value(user.LastName),
+		pointer.Value(user.Nickname),
+		pointer.Value(user.Email),
+		pointer.Value(user.Password),
+		user.AuthMethod,
+		pointer.Value(user.LanguageID),
 		user.CreatedAt,
+		pointer.Value(user.ExternalID),
 	).Scan(&id)
 	if err != nil {
 		return 0, fmt.Errorf("create user: %w", err)
@@ -58,7 +62,19 @@ func (u *user) Create(ctx context.Context, user models.UserCU) (id int64, err er
 }
 
 // Get
-func (u *user) Get(ctx context.Context, id int64) (user models.User, err error) {
+func (u *user) Get(ctx context.Context, obj models.UserGet) (user models.User, err error) {
+	var (
+		queryWhere string
+		arg        any
+	)
+	if obj.ID != 0 {
+		queryWhere = "WHERE id = $1"
+		arg = obj.ID
+	} else if obj.ExternalID != "" {
+		queryWhere = "WHERE external_id = $1"
+		arg = obj.ExternalID
+	}
+
 	err = QueryRow(ctx, u.db, `
 SELECT 
     id, 
@@ -71,8 +87,8 @@ SELECT
     language_id,
 	confirmed
 FROM users
-WHERE id = $1`,
-		id).Scan(
+`+queryWhere,
+		arg).Scan(
 		&user.ID,
 		&user.FirstName,
 		&user.LastName,
@@ -101,7 +117,8 @@ func (u *user) List(ctx context.Context, pars models.UserListPars) ([]models.Use
     auth_method,
 	created_at,
 	language_id,
-	confirmed
+	confirmed,
+	external_id
 `
 	queryFrom := "FROM users"
 	queryWhere := " WHERE "
@@ -137,7 +154,11 @@ func (u *user) List(ctx context.Context, pars models.UserListPars) ([]models.Use
 	if pars.Confirmed != nil {
 		args = append(args, *pars.Confirmed)
 		queryWhere += fmt.Sprintf(" confirmed = $%v AND", len(args))
+	}
 
+	if pars.ExternalID != nil {
+		args = append(args, *pars.ExternalID)
+		queryWhere += fmt.Sprintf(" external_id = $%v AND", len(args))
 	}
 
 	queryWhere = queryWhere[:len(queryWhere)-4] // Remove the trailing " AND"
@@ -171,6 +192,7 @@ func (u *user) List(ctx context.Context, pars models.UserListPars) ([]models.Use
 			&user.CreatedAt,
 			&user.LanguageID,
 			&user.Confirmed,
+			&user.ExternalID,
 		)
 		if err != nil {
 			return nil, 0, fmt.Errorf("scan user: %w", err)
@@ -187,16 +209,20 @@ func (u *user) List(ctx context.Context, pars models.UserListPars) ([]models.Use
 }
 
 // Update
-func (u *user) Update(ctx context.Context, id int64, user models.UserCU) error {
+func (u *user) Update(ctx context.Context, pars models.UserGet, user models.UserCU) error {
 	queryUpdate := `
 UPDATE users
 SET 
 `
-
-	queryWhere := "WHERE id = $1"
-
+	var queryWhere string
 	var args []any
-	args = append(args, id)
+	if pars.ID != 0 {
+		queryWhere = "WHERE id = $1"
+		args = append(args, pars.ID)
+	} else if pars.ExternalID != "" {
+		queryWhere = "WHERE external_id = $1"
+		args = append(args, pars.ExternalID)
+	}
 
 	if user.FirstName != nil {
 		args = append(args, *user.FirstName)
@@ -223,6 +249,11 @@ SET
 		queryUpdate += fmt.Sprintf(" confirmed = $%v ,", len(args))
 	}
 
+	if user.LanguageID != nil {
+		args = append(args, *user.LanguageID)
+		queryUpdate += fmt.Sprintf(" language_id = $%v ,", len(args))
+	}
+
 	queryUpdate = queryUpdate[:len(queryUpdate)-1]
 
 	_, err := Exec(ctx, u.db, queryUpdate+queryWhere, args...)
@@ -234,9 +265,21 @@ SET
 }
 
 // Delete
-func (u *user) Delete(ctx context.Context, id int64) error {
+func (u *user) Delete(ctx context.Context, obj models.UserGet) error {
 
-	_, err := Exec(ctx, u.db, "DELETE FROM users WHERE id = $1", id)
+	var (
+		queryWhere string
+		arg        any
+	)
+	if obj.ID != 0 {
+		queryWhere = "WHERE id = $1"
+		arg = obj.ID
+	} else if obj.ExternalID != "" {
+		queryWhere = "WHERE external_id = $1"
+		arg = obj.ExternalID
+	}
+
+	_, err := Exec(ctx, u.db, "DELETE FROM users "+queryWhere, arg)
 	if err != nil {
 		return fmt.Errorf("exec delete: %w", err)
 	}

@@ -20,7 +20,9 @@ func (uc *UseCase) UserConfirm(ctx context.Context, code string) error {
 		return errors.New("can not find code in cache")
 	}
 
-	_, err := uc.UserUpdate(ctx, id, models.UserCU{
+	_, err := uc.UserUpdate(ctx, models.UserGet{
+		ID: id,
+	}, models.UserCU{
 		Confirmed: true,
 	})
 	if err != nil {
@@ -36,7 +38,7 @@ func (uc *UseCase) UserConfirm(ctx context.Context, code string) error {
 func (uc *UseCase) sendConfirmationEmail(ctx context.Context, id int64) {
 	log := uc.log.With("method", "sendConfirmationEmail")
 
-	user, err := uc.UserGet(ctx, id)
+	user, err := uc.UserGet(ctx, models.UserGet{ID: id})
 	if err != nil {
 		log.With("error", err).Error("can not get user")
 		return

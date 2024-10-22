@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+
+	"github.com/mrbelka12000/linguo_sphere_backend/internal/models"
 )
 
 type (
@@ -57,7 +59,7 @@ func (h *Handler) authenticateMiddleware(next http.HandlerFunc, strict bool) htt
 				return
 			}
 
-			user, err := h.uc.UserGet(r.Context(), claims.ID)
+			user, err := h.uc.UserGet(r.Context(), models.UserGet{ID: claims.ID})
 			if err != nil {
 				w.WriteHeader(http.StatusUnauthorized)
 				h.log.Error("can not get user")

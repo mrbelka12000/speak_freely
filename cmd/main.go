@@ -14,6 +14,7 @@ import (
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/client/assembly"
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/client/mail"
 	handler "github.com/mrbelka12000/linguo_sphere_backend/internal/delivery/http/v1"
+	"github.com/mrbelka12000/linguo_sphere_backend/internal/delivery/tgbot"
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/repository"
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/service"
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/usecase"
@@ -73,6 +74,12 @@ func main() {
 		cfg.PublicURL,
 		usecase.WithLogger(log),
 	)
+
+	err = tgbot.Start(cfg, uc, log) // non blocking
+	if err != nil {
+		log.With("error", err).Error("failed to start tgbot")
+		return
+	}
 
 	internal.NewCron(uc, log).Start() // non blocking
 

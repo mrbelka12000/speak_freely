@@ -8,7 +8,7 @@ import (
 
 type (
 	userRepo interface {
-		Get(ctx context.Context, id int64) (models.User, error)
+		Get(ctx context.Context, pars models.UserGet) (models.User, error)
 		List(ctx context.Context, pars models.UserListPars) ([]models.User, int, error)
 	}
 	langRepo interface {
