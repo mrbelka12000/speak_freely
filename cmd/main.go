@@ -75,7 +75,7 @@ func main() {
 		usecase.WithLogger(log),
 	)
 
-	err = tgbot.Start(cfg, uc, log) // non blocking
+	err = tgbot.Start(cfg, uc, log, rCache) // non blocking
 	if err != nil {
 		log.With("error", err).Error("failed to start tgbot")
 		return

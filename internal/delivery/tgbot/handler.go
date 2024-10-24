@@ -22,16 +22,19 @@ type (
 
 		bot *tgbotapi.BotAPI
 		ch  tgbotapi.UpdatesChannel
+
+		cache cache
 	}
 
 	cache interface {
 		Set(key string, value interface{}, dur time.Duration) error
+		Get(key string) (string, bool)
 		GetInt64(key string) (int64, bool)
 		GetInt(key string) (int, bool)
 	}
 )
 
-func Start(cfg config.Config, uc *usecase.UseCase, log *slog.Logger) error {
+func Start(cfg config.Config, uc *usecase.UseCase, log *slog.Logger, cache cache) error {
 
 	bot, err := tgbotapi.NewBotAPI(cfg.BotToken)
 	if err != nil {
@@ -42,10 +45,11 @@ func Start(cfg config.Config, uc *usecase.UseCase, log *slog.Logger) error {
 	uCfg.Timeout = 60
 
 	h := handler{
-		uc:  uc,
-		log: log,
-		bot: bot,
-		ch:  bot.GetUpdatesChan(uCfg),
+		uc:    uc,
+		log:   log,
+		bot:   bot,
+		ch:    bot.GetUpdatesChan(uCfg),
+		cache: cache,
 	}
 
 	go h.handleUpdate()
@@ -71,11 +75,41 @@ func (h *handler) handleUpdate() {
 			continue
 		}
 
+		//handle audio/video messages
+		if id := getFileID(update.Message); id != "" {
+			fileURL, err := h.getFileURL(id)
+			if err != nil {
+				h.log.With("error", err).Error("get file url")
+				h.handleSendMessageError(h.bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, "something went wrong")))
+				continue
+			}
+
+			id := update.Message.From.ID
+
+			themeID, ok := h.cache.GetInt64(fmt.Sprintf("%d:theme", id))
+			if !ok {
+				h.log.With("error", err).Error("theme have not chosen")
+				h.handleSendMessageError(h.bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, "something went wrong")))
+				continue
+			}
+
+			_, err = h.uc.TranscriptBuildFromURL(
+				context.Background(),
+				fileURL,
+				themeID,
+				id,
+			)
+			if err != nil {
+				h.log.With("error", err).Error("save transcript")
+				h.handleSendMessageError(h.bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, "something went wrong")))
+				continue
+			}
+		}
+
 		msg := update.Message
 		switch msg.Command() {
 		case "start":
 			tgUser := msg.From
-
 			_, err := h.uc.UserGet(context.Background(), models.UserGet{ExternalID: fmt.Sprint(tgUser.ID)})
 			if err != nil {
 				// user not exists, create
@@ -124,7 +158,20 @@ func (h *handler) handleUpdate() {
 			toSendMsg := tgbotapi.NewMessage(msg.Chat.ID, "Which language do you want to learn?")
 			toSendMsg.ReplyMarkup = lMarkup
 			h.handleSendMessageError(h.bot.Send(toSendMsg))
+		case "themes":
+
+			tMarkup, err := h.getTopics(msg.From.ID)
+			if err != nil {
+				h.log.With("error", err).Error("get topics")
+				h.handleSendMessageError(h.bot.Send(tgbotapi.NewMessage(msg.Chat.ID, "something went wrong")))
+				continue
+			}
+
+			toSendMsg := tgbotapi.NewMessage(msg.Chat.ID, "Which theme do you want to discuss?")
+			toSendMsg.ReplyMarkup = tMarkup
+			h.handleSendMessageError(h.bot.Send(toSendMsg))
 		}
+
 	}
 }
 
@@ -154,11 +201,47 @@ func (h *handler) handleCallbacks(cb *tgbotapi.CallbackQuery) {
 			h.log.With("error", err).Error("update user")
 			return
 		}
+	case actionChooseTheme:
+		tgUser := cb.From
+		if tgUser == nil {
+			h.log.Error("empty user in callback")
+			return
+		}
+
+		err = h.cache.Set(fmt.Sprintf("%d:theme", tgUser.ID), cbData.TC.ID, 10*time.Minute)
+		if err != nil {
+			h.log.With("error", err).Error("set theme")
+			return
+		}
 	}
 }
 
 func (h *handler) handleSendMessageError(_ tgbotapi.Message, err error) {
 	if err != nil {
 		h.log.With("error", err).Error("send message")
+	}
+}
+
+func (h *handler) getFileURL(fileID string) (string, error) {
+	url, err := h.bot.GetFileDirectURL(fileID)
+	if err != nil {
+		return "", fmt.Errorf("get file direct url: %w", err)
+	}
+
+	return url, nil
+}
+
+func getFileID(msg *tgbotapi.Message) string {
+	switch {
+	case msg.Audio != nil:
+		return msg.Audio.FileID
+	case msg.Voice != nil:
+		return msg.Voice.FileID
+	case msg.Video != nil:
+		return msg.Video.FileID
+	case msg.VideoNote != nil:
+		return msg.VideoNote.FileID
+	default:
+		return ""
 	}
 }

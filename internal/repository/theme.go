@@ -78,7 +78,7 @@ func (t *theme) List(ctx context.Context, pars models.ThemeListPars) ([]models.T
 	queryWhere := " WHERE "
 	queryOffset := fmt.Sprintf(" OFFSET %d ", pars.Offset)
 	queryLimit := fmt.Sprintf(" LIMIT %d ", pars.Limit)
-
+	var queryOrderBy string
 	var args []any
 	if pars.ID != nil {
 		args = append(args, *pars.ID)
@@ -105,7 +105,11 @@ func (t *theme) List(ctx context.Context, pars models.ThemeListPars) ([]models.T
 		return nil, count, nil
 	}
 
-	rows, err := Query(ctx, t.db, querySelect+queryFrom+queryWhere+queryOffset+queryLimit, args...)
+	if pars.Random {
+		queryOrderBy = " ORDER BY random()"
+	}
+
+	rows, err := Query(ctx, t.db, querySelect+queryFrom+queryWhere+queryOrderBy+queryOffset+queryLimit, args...)
 	if err != nil {
 		return nil, 0, fmt.Errorf("list users: %w", err)
 	}

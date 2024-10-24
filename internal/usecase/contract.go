@@ -37,5 +37,6 @@ type (
 
 	transcriber interface {
 		GetTextFromFile(ctx context.Context, file io.Reader, lang string) (string, error)
+		GetTextFromURL(ctx context.Context, url, languageCode string) (string, error)
 	}
 )

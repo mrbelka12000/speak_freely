@@ -77,6 +77,51 @@ func (uc *UseCase) TranscriptBuild(
 	return id, nil, nil
 }
 
+// TranscriptBuildFromURL telegram variant
+func (uc *UseCase) TranscriptBuildFromURL(
+	ctx context.Context,
+	fileURL string,
+	themeID int64,
+	externalUserID int64,
+) (int64, error) {
+	ctx, err := uc.tx.Begin(ctx)
+	if err != nil {
+		return 0, fmt.Errorf("begin transaction: %w", err)
+	}
+	defer uc.tx.Rollback(ctx)
+
+	user, err := uc.UserGet(ctx, models.UserGet{
+		ExternalID: fmt.Sprint(externalUserID),
+	})
+	if err != nil {
+		return 0, fmt.Errorf("get user: %w", err)
+	}
+
+	//TODO make save files
+	text, err := uc.transcriber.GetTextFromURL(ctx, fileURL, user.Language.ShortName)
+	if err != nil {
+		return 0, fmt.Errorf("get text from message: %w", err)
+	}
+
+	id, err := uc.srv.Transcript.Create(ctx, models.TranscriptCU{
+		Text:       pointer.Of(text),
+		LanguageID: pointer.Of(user.LanguageID),
+		UserID:     pointer.Of(user.ID),
+		FileID:     pointer.Of(int64(1)),
+		ThemeID:    pointer.Of(themeID),
+	})
+	if err != nil {
+		return 0, fmt.Errorf("create transcript: %w", err)
+	}
+
+	err = uc.tx.Commit(ctx)
+	if err != nil {
+		return 0, fmt.Errorf("commit transaction: %w", err)
+	}
+
+	return id, nil
+}
+
 func (uc *UseCase) TranscriptGet(ctx context.Context, id int64, user models.User) (models.Transcript, error) {
 	obj, err := uc.srv.Transcript.Get(ctx, id)
 	if err != nil {

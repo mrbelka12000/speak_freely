@@ -6,9 +6,14 @@ type (
 	CallbackData struct {
 		Action action
 		LC     *LanguageChoose `json:"lc,omitempty"`
+		TC     *ThemeChoose    `json:"tc,omitempty"`
 	}
 
 	LanguageChoose struct {
+		ID int64
+	}
+
+	ThemeChoose struct {
 		ID int64
 	}
 
@@ -27,4 +32,5 @@ func unmarshalCallbackData(data string) (cb CallbackData, err error) {
 
 const (
 	actionChooseLanguage action = "choose_language"
+	actionChooseTheme    action = "choose_theme"
 )

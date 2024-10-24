@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
-	"strings"
 )
 
 type (
@@ -26,7 +25,7 @@ please provide response format with json(without any extra text, without formatt
 Here is an example of a response:
 [
    {
-		"lang": "en",
+		"lang": "en", n
 		"topic":"Describe your hometown",
 		"question":"What are the best things about the place where you grew up?"
    }
@@ -35,8 +34,7 @@ Here is an example of a response:
 The level of difficulty should be %v
 Provide for all languages that I need
 Topic and question should be in the same language as "lang"
-You can choose randomly from these topics:
-%v
+Topic is %v
 `
 )
 
@@ -55,7 +53,7 @@ func (c *Client) GenerateTopics(ctx context.Context, request GenerateTopicsReque
 		Messages: []Message{
 			{
 				Role:    "user",
-				Content: fmt.Sprintf(topicsPrompt, request.Level, strings.Join(preferences, ", ")),
+				Content: fmt.Sprintf(topicsPrompt, request.Level, getRandomTopic(preferences)),
 			},
 		},
 	},
