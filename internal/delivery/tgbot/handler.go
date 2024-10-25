@@ -85,7 +85,6 @@ func (h *handler) handleUpdate() {
 			}
 
 			id := update.Message.From.ID
-
 			themeID, ok := h.cache.GetInt64(fmt.Sprintf("%d:theme", id))
 			if !ok {
 				h.log.With("error", err).Error("theme have not chosen")
@@ -93,7 +92,7 @@ func (h *handler) handleUpdate() {
 				continue
 			}
 
-			_, err = h.uc.TranscriptBuildFromURL(
+			msg, err := h.uc.TranscriptBuildFromURL(
 				context.Background(),
 				fileURL,
 				themeID,
@@ -104,6 +103,9 @@ func (h *handler) handleUpdate() {
 				h.handleSendMessageError(h.bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, "something went wrong")))
 				continue
 			}
+
+			h.handleSendMessageError(h.bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, msg)))
+			continue
 		}
 
 		msg := update.Message

@@ -36,6 +36,7 @@ func (c *Cron) Start() {
 
 func (c *Cron) addThemes() {
 	for _, level := range []string{"A1", "A2", "B1", "B2", "C1"} {
+		break
 		err := c.uc.ThemesGenerateWithAI(context.Background(), level)
 		if err != nil {
 			c.log.With("error", err).Error(fmt.Sprintf("failed to generate theme for %s", level))

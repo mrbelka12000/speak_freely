@@ -26,13 +26,17 @@ func (t *transcript) Create(ctx context.Context, obj models.TranscriptCU) (id in
 		language_id,
 		user_id,
 		file_id,
-		theme_id
+		theme_id,
+	    accuracy,
+	    suggestion
 	) VALUES (
 	    $1,
 		$2,
 		$3,
 		$4,
-	    $5
+	    $5,
+	    $6,
+	    $7
 	) RETURNING id
 `,
 		*obj.Text,
@@ -40,6 +44,8 @@ func (t *transcript) Create(ctx context.Context, obj models.TranscriptCU) (id in
 		*obj.UserID,
 		*obj.FileID,
 		*obj.ThemeID,
+		*obj.Accuracy,
+		obj.Suggestion,
 	).Scan(&id)
 	if err != nil {
 		return 0, fmt.Errorf("transcript create: %w", err)

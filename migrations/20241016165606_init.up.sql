@@ -23,7 +23,8 @@ CREATE TABLE "transcripts" (
                                "language_id" INTEGER NOT NULL,
                                "user_id" INTEGER NOT NULL,
                                "file_id" INTEGER NOT NULL,
-                               "theme_id" INTEGER NOT NULL
+                               "theme_id" INTEGER NOT NULL,
+                               "suggestion" JSONB default '{}'
 );
 
 CREATE TABLE "themes" (

@@ -36,7 +36,7 @@ func (h *handler) getTopics(externalID int64) (empty tgbotapi.InlineKeyboardMark
 	for _, theme := range themes {
 		buttons = append(buttons, []tgbotapi.InlineKeyboardButton{
 			{
-				Text: fmt.Sprintf("%s. %s. %s ", theme.Topic, theme.Level, theme.Question),
+				Text: fmt.Sprintf("%s. %s. %s", theme.Topic, theme.Level, theme.Question),
 				CallbackData: pointer.Of(marshalCallbackData(CallbackData{
 					Action: actionChooseTheme,
 					TC: &ThemeChoose{

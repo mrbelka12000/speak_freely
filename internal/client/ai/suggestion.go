@@ -1,29 +1,29 @@
 package ai
 
-import "context"
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+)
 
 type (
 	SuggestionRequest struct {
 		Text     string
 		Topic    string
 		Question string
+		Language string
 	}
 
 	SuggestionResponse struct {
-		Accuracy    float64      `json:"accuracy"`
-		Suggestions []Suggestion `json:"suggestions"`
-	}
-
-	Suggestion struct {
-		From int    `json:"from"`
-		To   int    `json:"to"`
-		Text string `json:"text"`
+		Accuracy float64  `json:"accuracy"`
+		Text     string   `json:"text"`
+		Hints    []string `json:"hints"`
 	}
 )
 
 const (
 	suggestionPrompt = `
-Give me accuracy of this answer:
+Give me accuracy of this answer and fix grammar errors:
 %s
 
 Topic: %s
@@ -32,19 +32,46 @@ Question: %s
 Please provide response format with json(without any extra text, without formatting, only raw json, without newlines)
 Here is an example of a response:
 {
-	"accurancy": 0.91
-	"suggestions" :[
-		{
-			"start" : from,
-			"end" : to,
-			"text" : text to replace
-		}
-	]
+	"accuracy": 0.59,
+	"text": new text with corrections,
+	"hints:" [
+	provide some hints 
+]
 }
+
+Do not provide hints like this "Add a comma after 'Also'."
+Generate response in %s
 `
 )
 
-func (c *Client) GetSuggestions(ctx context.Context, req *SuggestionRequest) (empty SuggestionResponse, err error) {
+func (c *Client) GetSuggestions(ctx context.Context, req SuggestionRequest) (obj SuggestionResponse, err error) {
+	var out Out
 
-	return
+	err = c.do(
+		ctx,
+		In{
+			Model: c.gptModel,
+			Messages: []Message{
+				{
+					Role:    "user",
+					Content: fmt.Sprintf(suggestionPrompt, req.Text, req.Topic, req.Question, req.Language),
+				},
+			},
+		},
+		&out,
+	)
+	if err != nil {
+		return obj, fmt.Errorf("generating suggestions: %w", err)
+	}
+
+	if len(out.Choices) == 0 {
+		return obj, fmt.Errorf("no choices found")
+	}
+
+	err = json.Unmarshal([]byte(out.Choices[0].Message.Content), &obj)
+	if err != nil {
+		return obj, fmt.Errorf("unmarshalling response: %w", err)
+	}
+
+	return obj, nil
 }

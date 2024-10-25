@@ -18,6 +18,7 @@ type (
 		FileID     *int64   `json:"file_id,omitempty"`
 		ThemeID    *int64   `json:"theme_id,omitempty"`
 		Accuracy   *float64 `json:"accuracy,omitempty"`
+		Suggestion string   `json:"suggestion,omitempty"`
 	}
 
 	TranscriptListPars struct {

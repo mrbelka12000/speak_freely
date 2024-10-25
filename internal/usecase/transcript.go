@@ -2,10 +2,13 @@ package usecase
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+	"strings"
 
+	"github.com/mrbelka12000/linguo_sphere_backend/internal/client/ai"
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/models"
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/validate"
 	"github.com/mrbelka12000/linguo_sphere_backend/pkg/pointer"
@@ -83,10 +86,10 @@ func (uc *UseCase) TranscriptBuildFromURL(
 	fileURL string,
 	themeID int64,
 	externalUserID int64,
-) (int64, error) {
-	ctx, err := uc.tx.Begin(ctx)
+) (msg string, err error) {
+	ctx, err = uc.tx.Begin(ctx)
 	if err != nil {
-		return 0, fmt.Errorf("begin transaction: %w", err)
+		return "", fmt.Errorf("begin transaction: %w", err)
 	}
 	defer uc.tx.Rollback(ctx)
 
@@ -94,32 +97,50 @@ func (uc *UseCase) TranscriptBuildFromURL(
 		ExternalID: fmt.Sprint(externalUserID),
 	})
 	if err != nil {
-		return 0, fmt.Errorf("get user: %w", err)
+		return "", fmt.Errorf("get user: %w", err)
 	}
 
 	//TODO make save files
 	text, err := uc.transcriber.GetTextFromURL(ctx, fileURL, user.Language.ShortName)
 	if err != nil {
-		return 0, fmt.Errorf("get text from message: %w", err)
+		return "", fmt.Errorf("get text from message: %w", err)
 	}
 
-	id, err := uc.srv.Transcript.Create(ctx, models.TranscriptCU{
+	theme, err := uc.srv.Theme.Get(ctx, themeID)
+	if err != nil {
+		return "", fmt.Errorf("get theme: %w", err)
+	}
+
+	suggestions, err := uc.gen.GetSuggestions(ctx, ai.SuggestionRequest{
+		Text:     text,
+		Topic:    theme.Topic,
+		Question: theme.Question,
+		Language: user.Language.LongName,
+	})
+	if err != nil {
+		return "", fmt.Errorf("get suggestions: %w", err)
+	}
+	suggestionRaw, _ := json.Marshal(suggestions)
+
+	_, err = uc.srv.Transcript.Create(ctx, models.TranscriptCU{
 		Text:       pointer.Of(text),
 		LanguageID: pointer.Of(user.LanguageID),
 		UserID:     pointer.Of(user.ID),
 		FileID:     pointer.Of(int64(1)),
 		ThemeID:    pointer.Of(themeID),
+		Accuracy:   pointer.Of(suggestions.Accuracy),
+		Suggestion: string(suggestionRaw),
 	})
 	if err != nil {
-		return 0, fmt.Errorf("create transcript: %w", err)
+		return "", fmt.Errorf("create transcript: %w", err)
 	}
 
 	err = uc.tx.Commit(ctx)
 	if err != nil {
-		return 0, fmt.Errorf("commit transaction: %w", err)
+		return "", fmt.Errorf("commit transaction: %w", err)
 	}
 
-	return id, nil
+	return getSuggestionResponseTG(text, suggestions), nil
 }
 
 func (uc *UseCase) TranscriptGet(ctx context.Context, id int64, user models.User) (models.Transcript, error) {
@@ -137,4 +158,16 @@ func (uc *UseCase) TranscriptGet(ctx context.Context, id int64, user models.User
 
 func (uc *UseCase) TranscriptList(ctx context.Context, pars models.TranscriptListPars) ([]models.Transcript, int, error) {
 	return uc.srv.Transcript.List(ctx, pars)
+}
+
+func getSuggestionResponseTG(text string, s ai.SuggestionResponse) string {
+	return fmt.Sprintf(`Accuracy: %v
+	
+Your text:%s
+
+Corrected text: %s
+
+Hints:
+%v
+`, s.Accuracy, text, s.Text, strings.Join(s.Hints, "\n"))
 }

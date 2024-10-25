@@ -139,7 +139,7 @@ func (c *Client) do(ctx context.Context, in, out any) (err error) {
 			log.With("response_status", httpResp.Status)
 		}
 
-		//log.Info("execute request to ai")
+		log.Info("execute request to ai")
 	}()
 
 	if in != nil {
@@ -159,12 +159,12 @@ func (c *Client) do(ctx context.Context, in, out any) (err error) {
 	}
 	defer httpResp.Body.Close()
 
-	body, err := io.ReadAll(httpResp.Body)
+	respBody, err = io.ReadAll(httpResp.Body)
 	if err != nil {
 		return fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	err = json.Unmarshal(body, &out)
+	err = json.Unmarshal(respBody, &out)
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal response body: %w", err)
 	}
