@@ -3,7 +3,7 @@ CREATE TABLE "users" (
                          "first_name" VARCHAR(50) NOT NULL,
                          "last_name" VARCHAR(50) DEFAULT '',
                          "nickname" VARCHAR(50) UNIQUE NOT NULL,
-                         "email" VARCHAR(100) UNIQUE NOT NULL,
+                         "email" VARCHAR(100) NOT NULL,
                          "password" VARCHAR(200) NOT NULL,
                          "auth_method" INTEGER DEFAULT 1,
                          "confirmed" BOOLEAN DEFAULT false,
@@ -22,7 +22,7 @@ CREATE TABLE "transcripts" (
                                "accuracy" DOUBLE PRECISION,
                                "language_id" INTEGER NOT NULL,
                                "user_id" INTEGER NOT NULL,
-                               "file_id" INTEGER NOT NULL,
+                               "file_id" INTEGER,
                                "theme_id" INTEGER NOT NULL,
                                "suggestion" JSONB default '{}'
 );
@@ -42,8 +42,6 @@ CREATE TABLE "languages" (
 );
 
 ALTER TABLE "transcripts" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
-
-ALTER TABLE "transcripts" ADD FOREIGN KEY ("file_id") REFERENCES "files" ("id");
 
 ALTER TABLE "transcripts" ADD FOREIGN KEY ("theme_id") REFERENCES "themes" ("id");
 

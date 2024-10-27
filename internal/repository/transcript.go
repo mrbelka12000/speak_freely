@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/mrbelka12000/linguo_sphere_backend/internal/models"
+	"github.com/mrbelka12000/linguo_sphere_backend/pkg/pointer"
 )
 
 type transcript struct {
@@ -39,12 +40,12 @@ func (t *transcript) Create(ctx context.Context, obj models.TranscriptCU) (id in
 	    $7
 	) RETURNING id
 `,
-		*obj.Text,
-		*obj.LanguageID,
-		*obj.UserID,
-		*obj.FileID,
-		*obj.ThemeID,
-		*obj.Accuracy,
+		pointer.Value(obj.Text),
+		pointer.Value(obj.LanguageID),
+		pointer.Value(obj.UserID),
+		pointer.Value(obj.FileID),
+		pointer.Value(obj.ThemeID),
+		pointer.Value(obj.Accuracy),
 		obj.Suggestion,
 	).Scan(&id)
 	if err != nil {

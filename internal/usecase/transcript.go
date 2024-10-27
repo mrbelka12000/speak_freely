@@ -100,7 +100,6 @@ func (uc *UseCase) TranscriptBuildFromURL(
 		return "", fmt.Errorf("get user: %w", err)
 	}
 
-	//TODO make save files
 	text, err := uc.transcriber.GetTextFromURL(ctx, fileURL, user.Language.ShortName)
 	if err != nil {
 		return "", fmt.Errorf("get text from message: %w", err)
@@ -126,7 +125,6 @@ func (uc *UseCase) TranscriptBuildFromURL(
 		Text:       pointer.Of(text),
 		LanguageID: pointer.Of(user.LanguageID),
 		UserID:     pointer.Of(user.ID),
-		FileID:     pointer.Of(int64(1)),
 		ThemeID:    pointer.Of(themeID),
 		Accuracy:   pointer.Of(suggestions.Accuracy),
 		Suggestion: string(suggestionRaw),
