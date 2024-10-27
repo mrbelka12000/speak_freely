@@ -10,7 +10,7 @@ import (
 	"github.com/mrbelka12000/linguo_sphere_backend/pkg/pointer"
 )
 
-func (h *handler) getTopics(externalID int64) (empty tgbotapi.InlineKeyboardMarkup, err error) {
+func (h *handler) getThemes(externalID int64) (empty tgbotapi.InlineKeyboardMarkup, err error) {
 	ctx := context.Background()
 	user, err := h.uc.UserGet(ctx, models.UserGet{ExternalID: fmt.Sprint(externalID)})
 	if err != nil {
@@ -36,7 +36,7 @@ func (h *handler) getTopics(externalID int64) (empty tgbotapi.InlineKeyboardMark
 	for _, theme := range themes {
 		buttons = append(buttons, []tgbotapi.InlineKeyboardButton{
 			{
-				Text: fmt.Sprintf("%s. %s. %s", theme.Topic, theme.Level, theme.Question),
+				Text: fmt.Sprintf("%s", theme.Question),
 				CallbackData: pointer.Of(marshalCallbackData(CallbackData{
 					Action: actionChooseTheme,
 					TC: &ThemeChoose{

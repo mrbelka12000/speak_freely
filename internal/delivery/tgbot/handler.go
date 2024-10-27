@@ -162,7 +162,7 @@ func (h *handler) handleUpdate() {
 			h.handleSendMessageError(h.bot.Send(toSendMsg))
 		case "themes":
 
-			tMarkup, err := h.getTopics(msg.From.ID)
+			tMarkup, err := h.getThemes(msg.From.ID)
 			if err != nil {
 				h.log.With("error", err).Error("get topics")
 				h.handleSendMessageError(h.bot.Send(tgbotapi.NewMessage(msg.Chat.ID, "something went wrong")))
@@ -210,7 +210,7 @@ func (h *handler) handleCallbacks(cb *tgbotapi.CallbackQuery) {
 			return
 		}
 
-		err = h.cache.Set(fmt.Sprintf("%d:theme", tgUser.ID), cbData.TC.ID, 10*time.Minute)
+		err = h.cache.Set(fmt.Sprintf("%d:theme", tgUser.ID), cbData.TC.ID, 2*time.Hour)
 		if err != nil {
 			h.log.With("error", err).Error("set theme")
 			return

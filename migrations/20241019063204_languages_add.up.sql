@@ -6,39 +6,39 @@ INSERT INTO languages(
 
 INSERT INTO languages(
     long_name, short_name
-)VALUES('Spanish','es');
+)VALUES('Español','es');
 
 INSERT INTO languages(
     long_name, short_name
-)VALUES('French','fr');
+)VALUES('Français','fr');
 
 INSERT INTO languages(
     long_name, short_name
-)VALUES('German','de');
+)VALUES('Deutsch','de');
 
 INSERT INTO languages(
     long_name, short_name
-)VALUES('Italian','it');
+)VALUES('Italiano','it');
 
 INSERT INTO languages(
     long_name, short_name
-)VALUES('Portuguese','pt');
+)VALUES('Português','pt');
 
 INSERT INTO languages(
     long_name, short_name
-)VALUES('Japanese','ja');
+)VALUES('日本語','ja');
 
 INSERT INTO languages(
     long_name, short_name
-)VALUES('Korean','ko');
+)VALUES('한국어','ko');
 
 INSERT INTO languages(
     long_name, short_name
-)VALUES('Russian','ru');
+)VALUES('Русский','ru');
 
 INSERT INTO languages(
     long_name, short_name
-)VALUES('Turkish','tr');
+)VALUES('Türkçe','tr');
 
 
 
