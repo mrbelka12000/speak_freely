@@ -210,6 +210,13 @@ func (h *handler) handleCallbacks(cb *tgbotapi.CallbackQuery) {
 			return
 		}
 
+		theme, err := h.uc.ThemeGet(context.Background(), cbData.TC.ID)
+		if err != nil {
+			h.log.With("error", err).Error("get theme")
+			return
+		}
+
+		h.handleSendMessageError(h.bot.Send(tgbotapi.NewMessage(cb.Message.Chat.ID, theme.Question)))
 		err = h.cache.Set(fmt.Sprintf("%d:theme", tgUser.ID), cbData.TC.ID, 2*time.Hour)
 		if err != nil {
 			h.log.With("error", err).Error("set theme")

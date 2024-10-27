@@ -14,7 +14,7 @@ type (
 	}
 
 	ThemeChoose struct {
-		ID int64
+		ID int64 `json:"id"`
 	}
 
 	action string

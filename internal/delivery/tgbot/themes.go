@@ -43,6 +43,7 @@ func (h *handler) getThemes(externalID int64) (empty tgbotapi.InlineKeyboardMark
 						ID: theme.ID,
 					},
 				})),
+				SwitchInlineQueryCurrentChat: pointer.Of(fmt.Sprintf("%s", theme.Question)),
 			},
 		})
 	}
