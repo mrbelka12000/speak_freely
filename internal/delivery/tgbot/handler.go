@@ -88,7 +88,7 @@ func (h *handler) handleUpdate() {
 			themeID, ok := h.cache.GetInt64(fmt.Sprintf("%d:theme", id))
 			if !ok {
 				h.log.With("error", err).Error("theme have not chosen")
-				h.handleSendMessageError(h.bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, "something went wrong")))
+				h.handleSendMessageError(h.bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, "Please choose theme to discuss.")))
 				continue
 			}
 
