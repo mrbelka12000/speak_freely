@@ -3,6 +3,7 @@ package config
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/sethvargo/go-envconfig"
@@ -18,6 +19,7 @@ type (
 		RedisConfig
 		MinIOConfig
 		TelegramConfig
+		CronConfig
 	}
 
 	InstanceConfig struct {
@@ -58,6 +60,10 @@ type (
 
 	TelegramConfig struct {
 		BotToken string `env:"BOT_TOKEN,required"`
+	}
+
+	CronConfig struct {
+		GenerateInterval time.Duration `env:"GENERATE_INTERVAL,default=12h"`
 	}
 )
 

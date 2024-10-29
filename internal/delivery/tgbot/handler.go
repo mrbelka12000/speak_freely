@@ -31,6 +31,7 @@ type (
 		Get(key string) (string, bool)
 		GetInt64(key string) (int64, bool)
 		GetInt(key string) (int, bool)
+		Delete(key string)
 	}
 )
 
@@ -59,9 +60,10 @@ func Start(cfg config.Config, uc *usecase.UseCase, log *slog.Logger, cache cache
 
 func (h *handler) handleUpdate() {
 	for update := range h.ch {
+		ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 
 		if update.CallbackQuery != nil {
-			h.handleCallbacks(update.CallbackQuery)
+			h.handleCallbacks(ctx, update.CallbackQuery)
 			h.handleSendMessageError(h.bot.Send(
 				tgbotapi.NewDeleteMessage(
 					update.CallbackQuery.Message.Chat.ID,
@@ -84,19 +86,25 @@ func (h *handler) handleUpdate() {
 				continue
 			}
 
-			id := update.Message.From.ID
-			themeID, ok := h.cache.GetInt64(fmt.Sprintf("%d:theme", id))
+			userID := update.Message.From.ID
+			themeID, ok := h.cache.GetInt64(fmt.Sprintf("%d:theme", userID))
 			if !ok {
-				h.log.With("error", err).Error("theme have not chosen")
-				h.handleSendMessageError(h.bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, "Please choose theme to discuss.")))
+				answer, err := h.uc.Conversation(ctx, fileURL, userID)
+				if err != nil {
+					h.log.With("error", err).Error("get answer for conversation")
+					h.handleSendMessageError(h.bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, "something went wrong")))
+					continue
+				}
+
+				h.handleSendMessageError(h.bot.Send(tgbotapi.NewMessage(update.Message.Chat.ID, answer)))
 				continue
 			}
 
 			msg, err := h.uc.TranscriptBuildFromURL(
-				context.Background(),
+				ctx,
 				fileURL,
 				themeID,
-				id,
+				userID,
 			)
 			if err != nil {
 				h.log.With("error", err).Error("save transcript")
@@ -112,7 +120,7 @@ func (h *handler) handleUpdate() {
 		switch msg.Command() {
 		case "start":
 			tgUser := msg.From
-			_, err := h.uc.UserGet(context.Background(), models.UserGet{ExternalID: fmt.Sprint(tgUser.ID)})
+			_, err := h.uc.UserGet(ctx, models.UserGet{ExternalID: fmt.Sprint(tgUser.ID)})
 			if err != nil {
 				// user not exists, create
 				obj := models.UserCU{
@@ -124,7 +132,7 @@ func (h *handler) handleUpdate() {
 					ExternalID: pointer.Of(fmt.Sprint(tgUser.ID)),
 				}
 
-				_, _, err = h.uc.UserCreate(context.Background(), obj)
+				_, _, err = h.uc.UserCreate(ctx, obj)
 				if err != nil {
 					h.log.With("error", err).Error("failed to create user in tg")
 					h.handleSendMessageError(h.bot.Send(tgbotapi.NewMessage(msg.Chat.ID, "something went wrong")))
@@ -172,12 +180,13 @@ func (h *handler) handleUpdate() {
 			toSendMsg := tgbotapi.NewMessage(msg.Chat.ID, "Which theme do you want to discuss?")
 			toSendMsg.ReplyMarkup = tMarkup
 			h.handleSendMessageError(h.bot.Send(toSendMsg))
+		case "conversation":
+			h.cache.Delete(getThemeKey(update.Message.From.ID))
 		}
-
 	}
 }
 
-func (h *handler) handleCallbacks(cb *tgbotapi.CallbackQuery) {
+func (h *handler) handleCallbacks(ctx context.Context, cb *tgbotapi.CallbackQuery) {
 
 	cbData, err := unmarshalCallbackData(cb.Data)
 	if err != nil {
@@ -193,7 +202,7 @@ func (h *handler) handleCallbacks(cb *tgbotapi.CallbackQuery) {
 			return
 		}
 
-		_, err := h.uc.UserUpdate(context.Background(), models.UserGet{
+		_, err := h.uc.UserUpdate(ctx, models.UserGet{
 			ExternalID: fmt.Sprint(tgUser.ID),
 		}, models.UserCU{
 			LanguageID: pointer.Of(cbData.LC.ID),
@@ -210,14 +219,14 @@ func (h *handler) handleCallbacks(cb *tgbotapi.CallbackQuery) {
 			return
 		}
 
-		theme, err := h.uc.ThemeGet(context.Background(), cbData.TC.ID)
+		theme, err := h.uc.ThemeGet(ctx, cbData.TC.ID)
 		if err != nil {
 			h.log.With("error", err).Error("get theme")
 			return
 		}
 
 		h.handleSendMessageError(h.bot.Send(tgbotapi.NewMessage(cb.Message.Chat.ID, theme.Question)))
-		err = h.cache.Set(fmt.Sprintf("%d:theme", tgUser.ID), cbData.TC.ID, 2*time.Hour)
+		err = h.cache.Set(getThemeKey(tgUser.ID), cbData.TC.ID, 2*time.Hour)
 		if err != nil {
 			h.log.With("error", err).Error("set theme")
 			return
@@ -253,4 +262,8 @@ func getFileID(msg *tgbotapi.Message) string {
 	default:
 		return ""
 	}
+}
+
+func getThemeKey(id int64) string {
+	return fmt.Sprintf("%d:theme", id)
 }

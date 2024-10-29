@@ -9,17 +9,20 @@ import (
 	"github.com/go-co-op/gocron"
 
 	"github.com/mrbelka12000/speak_freely/internal/usecase"
+	"github.com/mrbelka12000/speak_freely/pkg/config"
 )
 
 type Cron struct {
 	uc  *usecase.UseCase
 	log *slog.Logger
+	cfg config.Config
 }
 
-func NewCron(uc *usecase.UseCase, log *slog.Logger) *Cron {
+func NewCron(uc *usecase.UseCase, log *slog.Logger, cfg config.Config) *Cron {
 	return &Cron{
 		uc:  uc,
 		log: log,
+		cfg: cfg,
 	}
 }
 
@@ -27,7 +30,7 @@ func NewCron(uc *usecase.UseCase, log *slog.Logger) *Cron {
 func (c *Cron) Start() {
 	s := gocron.NewScheduler(time.UTC)
 
-	s.Every(12).Hour().Do(func() {
+	s.Every(c.cfg.GenerateInterval).Do(func() {
 		c.addThemes()
 	})
 

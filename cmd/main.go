@@ -81,7 +81,7 @@ func main() {
 		return
 	}
 
-	internal.NewCron(uc, log).Start() // non blocking
+	internal.NewCron(uc, log, cfg).Start() // non blocking
 
 	h := handler.New(
 		uc,

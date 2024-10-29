@@ -30,6 +30,7 @@ type (
 	generator interface {
 		GenerateTopics(ctx context.Context, request ai.GenerateTopicsRequest) ([]ai.GenerateTopicsResponse, error)
 		GetSuggestions(ctx context.Context, req ai.SuggestionRequest) (obj ai.SuggestionResponse, err error)
+		Dialog(ctx context.Context, req ai.DialogRequest) (obj ai.DialogResponse, err error)
 	}
 
 	storage interface {
