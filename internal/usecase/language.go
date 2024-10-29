@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/mrbelka12000/linguo_sphere_backend/internal/models"
-	"github.com/mrbelka12000/linguo_sphere_backend/internal/validate"
+	"github.com/mrbelka12000/speak_freely/internal/models"
+	"github.com/mrbelka12000/speak_freely/internal/validate"
 )
 
 func (uc *UseCase) LanguageCreate(ctx context.Context, obj models.LanguageCU) (map[string]validate.RequiredField, error) {

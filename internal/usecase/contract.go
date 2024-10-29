@@ -5,8 +5,8 @@ import (
 	"io"
 	"time"
 
-	"github.com/mrbelka12000/linguo_sphere_backend/internal/client/ai"
-	"github.com/mrbelka12000/linguo_sphere_backend/internal/client/mail"
+	"github.com/mrbelka12000/speak_freely/internal/client/ai"
+	"github.com/mrbelka12000/speak_freely/internal/client/mail"
 )
 
 type (

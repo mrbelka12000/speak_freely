@@ -8,7 +8,7 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 
-	"github.com/mrbelka12000/linguo_sphere_backend/pkg/config"
+	"github.com/mrbelka12000/speak_freely/pkg/config"
 )
 
 type (

@@ -3,7 +3,7 @@ package v1
 import (
 	"errors"
 
-	"github.com/mrbelka12000/linguo_sphere_backend/internal/models"
+	"github.com/mrbelka12000/speak_freely/internal/models"
 )
 
 func getPaginationParams(pp models.PaginationParams) (models.PaginationParams, error) {

@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	lsb "github.com/mrbelka12000/linguo_sphere_backend"
-	"github.com/mrbelka12000/linguo_sphere_backend/internal/models"
-	"github.com/mrbelka12000/linguo_sphere_backend/internal/validate"
+	lsb "github.com/mrbelka12000/speak_freely"
+	"github.com/mrbelka12000/speak_freely/internal/models"
+	"github.com/mrbelka12000/speak_freely/internal/validate"
 )
 
 // UserCreate

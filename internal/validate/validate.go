@@ -7,8 +7,8 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	lsb "github.com/mrbelka12000/linguo_sphere_backend"
-	"github.com/mrbelka12000/linguo_sphere_backend/internal/models"
+	lsb "github.com/mrbelka12000/speak_freely"
+	"github.com/mrbelka12000/speak_freely/internal/models"
 )
 
 type (

@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/mrbelka12000/linguo_sphere_backend/internal/client/ai"
-	"github.com/mrbelka12000/linguo_sphere_backend/internal/models"
-	"github.com/mrbelka12000/linguo_sphere_backend/internal/validate"
-	"github.com/mrbelka12000/linguo_sphere_backend/pkg/pointer"
+	"github.com/mrbelka12000/speak_freely/internal/client/ai"
+	"github.com/mrbelka12000/speak_freely/internal/models"
+	"github.com/mrbelka12000/speak_freely/internal/validate"
+	"github.com/mrbelka12000/speak_freely/pkg/pointer"
 )
 
 func (uc *UseCase) ThemeGet(ctx context.Context, id int64) (models.Theme, error) {

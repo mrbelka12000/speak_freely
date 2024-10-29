@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/mrbelka12000/linguo_sphere_backend/internal/models"
+	"github.com/mrbelka12000/speak_freely/internal/models"
 )
 
 func (h *Handler) LanguageCreate(w http.ResponseWriter, r *http.Request) {

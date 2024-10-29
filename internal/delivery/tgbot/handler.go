@@ -8,11 +8,11 @@ import (
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 
-	lsb "github.com/mrbelka12000/linguo_sphere_backend"
-	"github.com/mrbelka12000/linguo_sphere_backend/internal/models"
-	"github.com/mrbelka12000/linguo_sphere_backend/internal/usecase"
-	"github.com/mrbelka12000/linguo_sphere_backend/pkg/config"
-	"github.com/mrbelka12000/linguo_sphere_backend/pkg/pointer"
+	lsb "github.com/mrbelka12000/speak_freely"
+	"github.com/mrbelka12000/speak_freely/internal/models"
+	"github.com/mrbelka12000/speak_freely/internal/usecase"
+	"github.com/mrbelka12000/speak_freely/pkg/config"
+	"github.com/mrbelka12000/speak_freely/pkg/pointer"
 )
 
 type (

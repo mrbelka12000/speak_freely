@@ -9,7 +9,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/gorilla/schema"
 
-	"github.com/mrbelka12000/linguo_sphere_backend/internal/usecase"
+	"github.com/mrbelka12000/speak_freely/internal/usecase"
 )
 
 type (

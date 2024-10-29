@@ -5,8 +5,8 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/mrbelka12000/linguo_sphere_backend/internal/service"
-	"github.com/mrbelka12000/linguo_sphere_backend/internal/validate"
+	"github.com/mrbelka12000/speak_freely/internal/service"
+	"github.com/mrbelka12000/speak_freely/internal/validate"
 )
 
 type (

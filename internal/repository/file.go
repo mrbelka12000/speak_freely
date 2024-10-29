@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/mrbelka12000/linguo_sphere_backend/internal/models"
+	"github.com/mrbelka12000/speak_freely/internal/models"
 )
 
 type (

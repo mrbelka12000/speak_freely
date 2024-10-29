@@ -6,7 +6,7 @@ import (
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 
-	"github.com/mrbelka12000/linguo_sphere_backend/pkg/pointer"
+	"github.com/mrbelka12000/speak_freely/pkg/pointer"
 )
 
 func (h *handler) getLanguages() (empty tgbotapi.InlineKeyboardMarkup, err error) {

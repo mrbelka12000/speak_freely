@@ -8,7 +8,7 @@ import (
 
 	_ "github.com/lib/pq"
 
-	"github.com/mrbelka12000/linguo_sphere_backend/pkg/config"
+	"github.com/mrbelka12000/speak_freely/pkg/config"
 )
 
 // Connect

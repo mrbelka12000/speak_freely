@@ -1,4 +1,4 @@
-module github.com/mrbelka12000/linguo_sphere_backend
+module github.com/mrbelka12000/speak_freely
 
 go 1.22
 

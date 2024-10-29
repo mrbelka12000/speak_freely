@@ -1,12 +1,12 @@
 package service
 
 import (
-	"github.com/mrbelka12000/linguo_sphere_backend/internal/repository"
-	fileservice "github.com/mrbelka12000/linguo_sphere_backend/internal/service/file"
-	languageservice "github.com/mrbelka12000/linguo_sphere_backend/internal/service/language"
-	themeservice "github.com/mrbelka12000/linguo_sphere_backend/internal/service/theme"
-	transcriptservice "github.com/mrbelka12000/linguo_sphere_backend/internal/service/transcript"
-	userservice "github.com/mrbelka12000/linguo_sphere_backend/internal/service/user"
+	"github.com/mrbelka12000/speak_freely/internal/repository"
+	fileservice "github.com/mrbelka12000/speak_freely/internal/service/file"
+	languageservice "github.com/mrbelka12000/speak_freely/internal/service/language"
+	themeservice "github.com/mrbelka12000/speak_freely/internal/service/theme"
+	transcriptservice "github.com/mrbelka12000/speak_freely/internal/service/transcript"
+	userservice "github.com/mrbelka12000/speak_freely/internal/service/user"
 )
 
 // Service adapter for usecase

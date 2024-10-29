@@ -9,8 +9,8 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/mrbelka12000/linguo_sphere_backend/internal/client/mail"
-	"github.com/mrbelka12000/linguo_sphere_backend/internal/models"
+	"github.com/mrbelka12000/speak_freely/internal/client/mail"
+	"github.com/mrbelka12000/speak_freely/internal/models"
 )
 
 // UserConfirm

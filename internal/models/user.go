@@ -1,6 +1,6 @@
 package models
 
-import lsb "github.com/mrbelka12000/linguo_sphere_backend"
+import lsb "github.com/mrbelka12000/speak_freely"
 
 type (
 	// User general user information
