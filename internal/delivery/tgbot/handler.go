@@ -255,8 +255,6 @@ func getFileID(msg *tgbotapi.Message) string {
 		return msg.Audio.FileID
 	case msg.Voice != nil:
 		return msg.Voice.FileID
-	case msg.Video != nil:
-		return msg.Video.FileID
 	case msg.VideoNote != nil:
 		return msg.VideoNote.FileID
 	default:

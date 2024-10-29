@@ -161,7 +161,7 @@ func (uc *UseCase) TranscriptList(ctx context.Context, pars models.TranscriptLis
 func getSuggestionResponseTG(text string, s ai.SuggestionResponse) string {
 	return fmt.Sprintf(`Accuracy: %v
 	
-Your text:%s
+Your text: %s
 
 Corrected text: %s
 
