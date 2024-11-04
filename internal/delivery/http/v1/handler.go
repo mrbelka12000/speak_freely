@@ -46,6 +46,10 @@ func (h *Handler) InitRoutes(r *mux.Router) {
 	r.Use(h.recovery)
 	r.Use(h.cors)
 
+	r.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+
 	// users
 	r.HandleFunc("/api/v1/register", h.Registration).Methods(http.MethodPost)
 	r.HandleFunc("/api/v1/login", h.Login).Methods(http.MethodPost)
