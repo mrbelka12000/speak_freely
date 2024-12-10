@@ -1,0 +1,1 @@
+ALTER TABLE themes ADD UNIQUE (question);

@@ -5,8 +5,10 @@ import "encoding/json"
 type (
 	CallbackData struct {
 		Action action
-		LC     *LanguageChoose `json:"lc,omitempty"`
-		TC     *ThemeChoose    `json:"tc,omitempty"`
+		LangC  *LanguageChoose `json:"langc,omitempty"`
+		ThemeC *ThemeChoose    `json:"themec,omitempty"`
+		TopC   *TopicChoose    `json:"topc,omitempty"`
+		LevelC *LevelChoose    `json:"levelc,omitempty"`
 	}
 
 	LanguageChoose struct {
@@ -15,6 +17,14 @@ type (
 
 	ThemeChoose struct {
 		ID int64 `json:"id"`
+	}
+
+	TopicChoose struct {
+		Name string `json:"name"`
+	}
+
+	LevelChoose struct {
+		Name string `json:"name"`
 	}
 
 	action string
@@ -33,4 +43,6 @@ func unmarshalCallbackData(data string) (cb CallbackData, err error) {
 const (
 	actionChooseLanguage action = "choose_language"
 	actionChooseTheme    action = "choose_theme"
+	actionChooseTopic    action = "choose_topic"
+	actionChooseLevel    action = "choose_level"
 )

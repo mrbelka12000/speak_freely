@@ -17,9 +17,22 @@ func (h *handler) getThemes(externalID int64) (empty tgbotapi.InlineKeyboardMark
 		return empty, fmt.Errorf("get user: %w", err)
 	}
 
+	var level, topic *string
+	levelStr, ok := h.cache.Get(getLevelKey(externalID))
+	if ok {
+		level = &levelStr
+	}
+
+	topicStr, ok := h.cache.Get(getTopicKey(externalID))
+	if ok {
+		topic = &topicStr
+	}
+	fmt.Println(topicStr)
+
 	themes, count, err := h.uc.ThemeList(ctx, models.ThemeListPars{
 		LanguageID: pointer.Of(user.LanguageID),
-		Random:     true,
+		Level:      level,
+		Topic:      topic,
 		PaginationParams: models.PaginationParams{
 			Limit: 10,
 			Page:  1,
@@ -39,7 +52,7 @@ func (h *handler) getThemes(externalID int64) (empty tgbotapi.InlineKeyboardMark
 				Text: fmt.Sprintf("%s", theme.Question),
 				CallbackData: pointer.Of(marshalCallbackData(CallbackData{
 					Action: actionChooseTheme,
-					TC: &ThemeChoose{
+					ThemeC: &ThemeChoose{
 						ID: theme.ID,
 					},
 				})),

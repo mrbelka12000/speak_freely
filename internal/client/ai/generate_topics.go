@@ -25,7 +25,7 @@ please provide response format with json(without any extra text, without formatt
 Here is an example of a response:
 [
    {
-		"lang": "en", n
+		"lang": "en",
 		"topic":"Describe your hometown",
 		"question":"What are the best things about the place where you grew up?"
    }

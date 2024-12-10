@@ -182,6 +182,16 @@ func (h *handler) handleUpdate() {
 			h.handleSendMessageError(h.bot.Send(toSendMsg))
 		case "conversation":
 			h.cache.Delete(getThemeKey(update.Message.From.ID))
+			h.cache.Delete(getTopicKey(update.Message.From.ID))
+		case "topic":
+			toSendMsg := tgbotapi.NewMessage(msg.Chat.ID, "Which topic do you want to discuss?")
+			toSendMsg.ReplyMarkup = getTopics()
+			h.handleSendMessageError(h.bot.Send(toSendMsg))
+
+		case "level":
+			toSendMsg := tgbotapi.NewMessage(msg.Chat.ID, "Which level are you ?")
+			toSendMsg.ReplyMarkup = getLevels()
+			h.handleSendMessageError(h.bot.Send(toSendMsg))
 		}
 	}
 }
@@ -194,18 +204,18 @@ func (h *handler) handleCallbacks(ctx context.Context, cb *tgbotapi.CallbackQuer
 		return
 	}
 
+	tgUser := cb.From
+	if tgUser == nil {
+		h.log.Error("empty user in callback")
+		return
+	}
 	switch cbData.Action {
 	case actionChooseLanguage:
-		tgUser := cb.From
-		if tgUser == nil {
-			h.log.Error("empty user in callback")
-			return
-		}
 
 		_, err := h.uc.UserUpdate(ctx, models.UserGet{
 			ExternalID: fmt.Sprint(tgUser.ID),
 		}, models.UserCU{
-			LanguageID: pointer.Of(cbData.LC.ID),
+			LanguageID: pointer.Of(cbData.LangC.ID),
 			AuthMethod: lsb.AuthMethodTG,
 		})
 		if err != nil {
@@ -213,22 +223,33 @@ func (h *handler) handleCallbacks(ctx context.Context, cb *tgbotapi.CallbackQuer
 			return
 		}
 	case actionChooseTheme:
-		tgUser := cb.From
-		if tgUser == nil {
-			h.log.Error("empty user in callback")
-			return
-		}
 
-		theme, err := h.uc.ThemeGet(ctx, cbData.TC.ID)
+		theme, err := h.uc.ThemeGet(ctx, cbData.ThemeC.ID)
 		if err != nil {
 			h.log.With("error", err).Error("get theme")
 			return
 		}
 
 		h.handleSendMessageError(h.bot.Send(tgbotapi.NewMessage(cb.Message.Chat.ID, theme.Question)))
-		err = h.cache.Set(getThemeKey(tgUser.ID), cbData.TC.ID, 2*time.Hour)
+		err = h.cache.Set(getThemeKey(tgUser.ID), cbData.ThemeC.ID, 2*time.Hour)
 		if err != nil {
 			h.log.With("error", err).Error("set theme")
+			return
+		}
+	case actionChooseTopic:
+
+		h.handleSendMessageError(h.bot.Send(tgbotapi.NewMessage(cb.Message.Chat.ID, "Your choice: "+cbData.TopC.Name)))
+		err = h.cache.Set(getTopicKey(tgUser.ID), cbData.TopC.Name, 2*time.Hour)
+		if err != nil {
+			h.log.With("error", err).Error("set topic")
+			return
+		}
+
+	case actionChooseLevel:
+		h.handleSendMessageError(h.bot.Send(tgbotapi.NewMessage(cb.Message.Chat.ID, "Your choice: "+cbData.LevelC.Name)))
+		err = h.cache.Set(getLevelKey(tgUser.ID), cbData.LevelC.Name, 100*time.Hour)
+		if err != nil {
+			h.log.With("error", err).Error("set level")
 			return
 		}
 	}
@@ -264,4 +285,12 @@ func getFileID(msg *tgbotapi.Message) string {
 
 func getThemeKey(id int64) string {
 	return fmt.Sprintf("%d:theme", id)
+}
+
+func getTopicKey(id any) string {
+	return fmt.Sprintf("%v:topic", id)
+}
+
+func getLevelKey(id any) string {
+	return fmt.Sprintf("%v:level", id)
 }

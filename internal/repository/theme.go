@@ -67,7 +67,7 @@ WHERE id = $1`,
 
 func (t *theme) List(ctx context.Context, pars models.ThemeListPars) ([]models.Theme, int, error) {
 	querySelect := `
-   SELECT 
+   SELECT DISTINCT ON (question)
 	id,
 	level,
 	topic,
@@ -94,6 +94,12 @@ func (t *theme) List(ctx context.Context, pars models.ThemeListPars) ([]models.T
 		args = append(args, *pars.LanguageID)
 		queryWhere += fmt.Sprintf(" language_id = $%v AND", len(args))
 	}
+
+	if pars.Topic != nil {
+		args = append(args, *pars.Topic)
+		queryWhere += fmt.Sprintf(" topic = $%v AND", len(args))
+	}
+
 	queryWhere = queryWhere[:len(queryWhere)-4] // Remove the trailing " AND"
 
 	var count int
@@ -109,6 +115,7 @@ func (t *theme) List(ctx context.Context, pars models.ThemeListPars) ([]models.T
 		queryOrderBy = " ORDER BY random()"
 	}
 
+	fmt.Println(querySelect + queryFrom + queryWhere + queryOrderBy + queryOffset + queryLimit)
 	rows, err := Query(ctx, t.db, querySelect+queryFrom+queryWhere+queryOrderBy+queryOffset+queryLimit, args...)
 	if err != nil {
 		return nil, 0, fmt.Errorf("list users: %w", err)

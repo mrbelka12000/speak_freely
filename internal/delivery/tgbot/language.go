@@ -22,7 +22,7 @@ func (h *handler) getLanguages() (empty tgbotapi.InlineKeyboardMarkup, err error
 				Text: l.LongName,
 				CallbackData: pointer.Of(marshalCallbackData(CallbackData{
 					Action: actionChooseLanguage,
-					LC:     &LanguageChoose{ID: l.ID},
+					LangC:  &LanguageChoose{ID: l.ID},
 				})),
 			},
 		})
