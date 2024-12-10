@@ -8,8 +8,9 @@ import (
 
 type (
 	DialogRequest struct {
-		Text     string
-		Language string
+		Text           string
+		Language       string
+		ConversationID string
 	}
 
 	DialogResponse struct {
@@ -30,6 +31,7 @@ Here is an example of a response:
 }
 
 Generate response in %s
+Save information for conversation %s and answer with information according to this ID  
 `
 )
 
@@ -42,7 +44,7 @@ func (c *Client) Dialog(ctx context.Context, req DialogRequest) (obj DialogRespo
 			Messages: []Message{
 				{
 					Role:    "user",
-					Content: fmt.Sprintf(dialogPrompt, req.Text, req.Language),
+					Content: fmt.Sprintf(dialogPrompt, req.Text, req.Language, req.ConversationID),
 				},
 			},
 		},
