@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"fmt"
+	"math/rand"
 
 	"github.com/mrbelka12000/speak_freely/internal/client/ai"
 	"github.com/mrbelka12000/speak_freely/internal/models"
@@ -21,6 +22,12 @@ func (uc *UseCase) ThemeGet(ctx context.Context, id int64) (models.Theme, error)
 		return models.Theme{}, err
 	}
 	theme.Language = &lang
+
+	topic, err := uc.srv.Topic.Get(ctx, theme.TopicID)
+	if err != nil {
+		return models.Theme{}, err
+	}
+	theme.Topic = &topic
 
 	return theme, nil
 }
@@ -43,39 +50,38 @@ func (uc *UseCase) ThemeBuild(ctx context.Context, obj models.ThemeCU) (int64, m
 }
 
 func (uc *UseCase) ThemesGenerateWithAI(ctx context.Context, level string) error {
-	topics, err := uc.gen.GenerateTopics(ctx, ai.GenerateTopicsRequest{
-		Level: level,
-	})
+
+	languages, _, err := uc.srv.Language.List(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to generate topics: %w", err)
+		return fmt.Errorf("get language list %w", err)
 	}
 
-	ctx, err = uc.tx.Begin(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to begin transaction: %w", err)
-	}
-	defer uc.tx.Rollback(ctx)
-
-	for _, topic := range topics {
-		lang, err := uc.srv.Language.GetByShortName(ctx, topic.Lang)
+	for _, language := range languages {
+		topics, err := uc.srv.Topic.List(ctx, language.ID)
 		if err != nil {
-			return fmt.Errorf("failed to get language by name: %w", err)
+			return fmt.Errorf("get topic list %w", err)
+		}
+
+		randTopic := topics[rand.Intn(len(topics))]
+
+		theme, err := uc.gen.GenerateTheme(ctx, ai.GenerateThemeRequest{
+			Level:    level,
+			Language: language.ShortName,
+			Topic:    randTopic.Name,
+		})
+		if err != nil {
+			return fmt.Errorf("generate theme %w", err)
 		}
 
 		_, err = uc.srv.Theme.Create(ctx, models.ThemeCU{
-			LanguageID: pointer.Of(lang.ID),
-			Topic:      pointer.Of(topic.Topic),
-			Question:   pointer.Of(topic.Question),
+			LanguageID: pointer.Of(language.ID),
+			TopicID:    pointer.Of(randTopic.ID),
+			Question:   pointer.Of(theme.Question),
 			Level:      pointer.Of(level),
 		})
 		if err != nil {
 			return fmt.Errorf("failed to create theme: %w", err)
 		}
-	}
-
-	err = uc.tx.Commit(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	return nil

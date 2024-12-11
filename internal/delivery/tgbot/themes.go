@@ -17,22 +17,24 @@ func (h *handler) getThemes(externalID int64) (empty tgbotapi.InlineKeyboardMark
 		return empty, fmt.Errorf("get user: %w", err)
 	}
 
-	var level, topic *string
+	var (
+		level   *string
+		topicID *int64
+	)
 	levelStr, ok := h.cache.Get(getLevelKey(externalID))
 	if ok {
 		level = &levelStr
 	}
 
-	topicStr, ok := h.cache.Get(getTopicKey(externalID))
+	topicStr, ok := h.cache.GetInt64(getTopicKey(externalID))
 	if ok {
-		topic = &topicStr
+		topicID = &topicStr
 	}
-	fmt.Println(topicStr)
 
 	themes, count, err := h.uc.ThemeList(ctx, models.ThemeListPars{
 		LanguageID: pointer.Of(user.LanguageID),
 		Level:      level,
-		Topic:      topic,
+		TopicID:    topicID,
 		PaginationParams: models.PaginationParams{
 			Limit: 10,
 			Page:  1,
@@ -42,7 +44,7 @@ func (h *handler) getThemes(externalID int64) (empty tgbotapi.InlineKeyboardMark
 		return empty, fmt.Errorf("get themes: %w", err)
 	}
 	if count == 0 {
-		return empty, nil
+		return empty, fmt.Errorf("get themes: no themes found")
 	}
 
 	buttons := make([][]tgbotapi.InlineKeyboardButton, 0, count)

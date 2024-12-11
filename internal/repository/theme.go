@@ -20,7 +20,7 @@ func (t *theme) Create(ctx context.Context, obj models.ThemeCU) (id int64, err e
 	err = QueryRow(ctx, t.db, `
 	INSERT INTO themes (
         level, 
-		topic, 
+		topic_id, 
         question,
 		language_id) 
 	VALUES (
@@ -30,7 +30,7 @@ func (t *theme) Create(ctx context.Context, obj models.ThemeCU) (id int64, err e
         $4
 	) RETURNING id`,
 		*obj.Level,
-		*obj.Topic,
+		*obj.TopicID,
 		*obj.Question,
 		*obj.LanguageID,
 	).Scan(&id)
@@ -46,7 +46,7 @@ func (t *theme) Get(ctx context.Context, id int64) (theme models.Theme, err erro
 SELECT 
 	id,
 	level,
-	topic,
+	topic_id,
 	question,
 	language_id
 FROM themes
@@ -54,7 +54,7 @@ WHERE id = $1`,
 		id).Scan(
 		&theme.ID,
 		&theme.Level,
-		&theme.Topic,
+		&theme.TopicID,
 		&theme.Question,
 		&theme.LanguageID,
 	)
@@ -70,7 +70,7 @@ func (t *theme) List(ctx context.Context, pars models.ThemeListPars) ([]models.T
    SELECT DISTINCT ON (question)
 	id,
 	level,
-	topic,
+	topic_id,
 	question,
 	language_id
 `
@@ -95,9 +95,9 @@ func (t *theme) List(ctx context.Context, pars models.ThemeListPars) ([]models.T
 		queryWhere += fmt.Sprintf(" language_id = $%v AND", len(args))
 	}
 
-	if pars.Topic != nil {
-		args = append(args, *pars.Topic)
-		queryWhere += fmt.Sprintf(" topic = $%v AND", len(args))
+	if pars.TopicID != nil {
+		args = append(args, *pars.TopicID)
+		queryWhere += fmt.Sprintf(" topic_id = $%v AND", len(args))
 	}
 
 	queryWhere = queryWhere[:len(queryWhere)-4] // Remove the trailing " AND"
@@ -115,7 +115,6 @@ func (t *theme) List(ctx context.Context, pars models.ThemeListPars) ([]models.T
 		queryOrderBy = " ORDER BY random()"
 	}
 
-	fmt.Println(querySelect + queryFrom + queryWhere + queryOrderBy + queryOffset + queryLimit)
 	rows, err := Query(ctx, t.db, querySelect+queryFrom+queryWhere+queryOrderBy+queryOffset+queryLimit, args...)
 	if err != nil {
 		return nil, 0, fmt.Errorf("list users: %w", err)
@@ -129,7 +128,7 @@ func (t *theme) List(ctx context.Context, pars models.ThemeListPars) ([]models.T
 		err := rows.Scan(
 			&theme.ID,
 			&theme.Level,
-			&theme.Topic,
+			&theme.TopicID,
 			&theme.Question,
 			&theme.LanguageID,
 		)

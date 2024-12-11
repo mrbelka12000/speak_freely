@@ -105,14 +105,14 @@ func (uc *UseCase) TranscriptBuildFromURL(
 		return "", fmt.Errorf("get text from message: %w", err)
 	}
 
-	theme, err := uc.srv.Theme.Get(ctx, themeID)
+	theme, err := uc.ThemeGet(ctx, themeID)
 	if err != nil {
 		return "", fmt.Errorf("get theme: %w", err)
 	}
 
 	suggestions, err := uc.gen.GetSuggestions(ctx, ai.SuggestionRequest{
 		Text:     text,
-		Topic:    theme.Topic,
+		Topic:    theme.Topic.Name,
 		Question: theme.Question,
 		Language: user.Language.LongName,
 	})

@@ -4,15 +4,15 @@ import "encoding/json"
 
 type (
 	CallbackData struct {
-		Action action
-		LangC  *LanguageChoose `json:"langc,omitempty"`
-		ThemeC *ThemeChoose    `json:"themec,omitempty"`
-		TopC   *TopicChoose    `json:"topc,omitempty"`
-		LevelC *LevelChoose    `json:"levelc,omitempty"`
+		Action action          `json:"a"`
+		LangC  *LanguageChoose `json:"lgc,omitempty"`
+		ThemeC *ThemeChoose    `json:"thc,omitempty"`
+		TopC   *TopicChoose    `json:"tpc,omitempty"`
+		LevelC *LevelChoose    `json:"lvlc,omitempty"`
 	}
 
 	LanguageChoose struct {
-		ID int64
+		ID int64 `json:"id"`
 	}
 
 	ThemeChoose struct {
@@ -20,7 +20,7 @@ type (
 	}
 
 	TopicChoose struct {
-		Name string `json:"name"`
+		ID int64 `json:"id"`
 	}
 
 	LevelChoose struct {

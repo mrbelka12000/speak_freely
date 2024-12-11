@@ -10,7 +10,7 @@ import (
 func TestClient_GenerateTopics(t *testing.T) {
 	t.Skip("dev purpose only")
 
-	resp, err := testClient.GenerateTopics(context.Background(), GenerateTopicsRequest{
+	resp, err := testClient.GenerateTheme(context.Background(), GenerateThemeRequest{
 		Level: "B2",
 	})
 	assert.NoError(t, err)

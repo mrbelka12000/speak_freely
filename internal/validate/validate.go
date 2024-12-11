@@ -371,13 +371,13 @@ func (v *Validator) ValidateTheme(ctx context.Context, obj models.ThemeCU) (map[
 	}
 
 	// topic check
-	if obj.Topic == nil {
+	if obj.TopicID == nil {
 		mp["topic"] = RequiredField{
 			Description: ErrMissingTopic.Error(),
 		}
 	}
-	if obj.Topic != nil {
-		if *obj.Topic == "" {
+	if obj.TopicID != nil {
+		if *obj.TopicID == 0 {
 			mp["topic"] = RequiredField{
 				Description: ErrMissingTopic.Error(),
 			}

@@ -6,10 +6,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/uuid"
-
 	"github.com/mrbelka12000/speak_freely/internal/client/ai"
 	"github.com/mrbelka12000/speak_freely/internal/models"
+)
+
+const (
+	saveDuration = 30 * time.Minute
 )
 
 func (uc *UseCase) Conversation(
@@ -17,15 +19,6 @@ func (uc *UseCase) Conversation(
 	fileURL string,
 	externalUserID int64,
 ) (string, error) {
-
-	conversationID, ok := uc.cache.Get(fmt.Sprintf("conversation_%d", externalUserID))
-	if !ok {
-		conversationID = uuid.New().String()
-		err := uc.cache.Set(fmt.Sprintf("conversation_%d", externalUserID), conversationID, 1*time.Hour)
-		if err != nil {
-			uc.log.With("error", err).Error("can not save conversation")
-		}
-	}
 
 	user, err := uc.UserGet(ctx, models.UserGet{
 		ExternalID: fmt.Sprint(externalUserID),
@@ -53,11 +46,10 @@ func (uc *UseCase) Conversation(
 	}
 
 	dialog, err := uc.gen.Dialog(ctx, ai.DialogRequest{
-		Text:           question,
-		Language:       user.Language.LongName,
-		ConversationID: conversationID,
-		Questions:      prevQuestions,
-		Answers:        prevAnswers,
+		Text:      question,
+		Language:  user.Language.LongName,
+		Questions: prevQuestions,
+		Answers:   prevAnswers,
 	})
 	if err != nil {
 		return "", fmt.Errorf("get dialog: %w", err)
@@ -77,41 +69,41 @@ func (uc *UseCase) Conversation(
 }
 
 func (uc *UseCase) saveAnswer(externalUserID int64, text string) error {
-	answer, ok := uc.cache.Get(getAnswerKey(externalUserID))
+	answer, ok := uc.cache.Get(GetAnswerKey(externalUserID))
 	if ok {
 		answer = fmt.Sprintf("%s---%s", answer, text)
 	} else {
 		answer = text
 	}
 
-	return uc.cache.Set(getAnswerKey(externalUserID), answer, 1*time.Hour)
+	return uc.cache.Set(GetAnswerKey(externalUserID), answer, saveDuration)
 }
 
 func (uc *UseCase) getAnswer(externalUserID int64) (string, bool) {
-	answer, ok := uc.cache.Get(getAnswerKey(externalUserID))
+	answer, ok := uc.cache.Get(GetAnswerKey(externalUserID))
 	return answer, ok
 }
 
-func getAnswerKey(externalUserID int64) string {
+func GetAnswerKey(externalUserID int64) string {
 	return fmt.Sprintf("answer_%d", externalUserID)
 }
 
 func (uc *UseCase) saveQuestion(externalUserID int64, text string) error {
-	question, ok := uc.cache.Get(getQuestionKey(externalUserID))
+	question, ok := uc.cache.Get(GetQuestionKey(externalUserID))
 	if ok {
 		question = fmt.Sprintf("%s---%s", question, text)
 	} else {
 		question = text
 	}
 
-	return uc.cache.Set(getQuestionKey(externalUserID), question, 1*time.Hour)
+	return uc.cache.Set(GetQuestionKey(externalUserID), question, saveDuration)
 }
 
 func (uc *UseCase) getQuestion(externalUserID int64) (string, bool) {
-	question, ok := uc.cache.Get(getQuestionKey(externalUserID))
+	question, ok := uc.cache.Get(GetQuestionKey(externalUserID))
 	return question, ok
 }
 
-func getQuestionKey(externalUserID int64) string {
+func GetQuestionKey(externalUserID int64) string {
 	return fmt.Sprintf("question_%d", externalUserID)
 }

@@ -14,6 +14,7 @@ type (
 		Theme      *theme
 		File       *file
 		Transcript *transcript
+		Topic      *topic
 	}
 
 	contract interface {
@@ -32,6 +33,7 @@ func New(db *sql.DB) *Repo {
 		Theme:      newTheme(db),
 		File:       newFile(db),
 		Transcript: newTranscript(db),
+		Topic:      newTopic(db),
 	}
 }
 

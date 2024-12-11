@@ -60,7 +60,7 @@ func Start(cfg config.Config, uc *usecase.UseCase, log *slog.Logger, cache cache
 
 func (h *handler) handleUpdate() {
 	for update := range h.ch {
-		ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+		ctx, _ := context.WithTimeout(context.Background(), 2*time.Minute)
 
 		if update.CallbackQuery != nil {
 			h.handleCallbacks(ctx, update.CallbackQuery)
@@ -117,9 +117,9 @@ func (h *handler) handleUpdate() {
 		}
 
 		msg := update.Message
+		tgUser := msg.From
 		switch msg.Command() {
 		case "start":
-			tgUser := msg.From
 			_, err := h.uc.UserGet(ctx, models.UserGet{ExternalID: fmt.Sprint(tgUser.ID)})
 			if err != nil {
 				// user not exists, create
@@ -173,7 +173,7 @@ func (h *handler) handleUpdate() {
 			tMarkup, err := h.getThemes(msg.From.ID)
 			if err != nil {
 				h.log.With("error", err).Error("get topics")
-				h.handleSendMessageError(h.bot.Send(tgbotapi.NewMessage(msg.Chat.ID, "something went wrong")))
+				h.handleSendMessageError(h.bot.Send(tgbotapi.NewMessage(msg.Chat.ID, "По вашим критериям ничего не найдено, попробуйте выбрать другую тему.")))
 				continue
 			}
 
@@ -183,14 +183,22 @@ func (h *handler) handleUpdate() {
 		case "conversation":
 			h.cache.Delete(getThemeKey(update.Message.From.ID))
 			h.cache.Delete(getTopicKey(update.Message.From.ID))
+			h.cache.Delete(getLevelKey(update.Message.From.ID))
+			h.cache.Delete(usecase.GetQuestionKey(update.Message.From.ID))
+			h.cache.Delete(usecase.GetAnswerKey(update.Message.From.ID))
 		case "topic":
 			toSendMsg := tgbotapi.NewMessage(msg.Chat.ID, "Which topic do you want to discuss?")
-			toSendMsg.ReplyMarkup = getTopics()
+			toSendMsg.ReplyMarkup = h.getTopics(ctx, tgUser.ID)
 			h.handleSendMessageError(h.bot.Send(toSendMsg))
 
 		case "level":
 			toSendMsg := tgbotapi.NewMessage(msg.Chat.ID, "Which level are you ?")
 			toSendMsg.ReplyMarkup = getLevels()
+			h.handleSendMessageError(h.bot.Send(toSendMsg))
+		case "help":
+			user, _ := h.uc.UserGet(ctx, models.UserGet{ExternalID: fmt.Sprint(tgUser.ID)})
+			faq := lsb.GetFAQ(pointer.Value(user.Language).ShortName)
+			toSendMsg := tgbotapi.NewMessage(msg.Chat.ID, faq)
 			h.handleSendMessageError(h.bot.Send(toSendMsg))
 		}
 	}
@@ -238,8 +246,7 @@ func (h *handler) handleCallbacks(ctx context.Context, cb *tgbotapi.CallbackQuer
 		}
 	case actionChooseTopic:
 
-		h.handleSendMessageError(h.bot.Send(tgbotapi.NewMessage(cb.Message.Chat.ID, "Your choice: "+cbData.TopC.Name)))
-		err = h.cache.Set(getTopicKey(tgUser.ID), cbData.TopC.Name, 2*time.Hour)
+		err = h.cache.Set(getTopicKey(tgUser.ID), cbData.TopC.ID, 2*time.Hour)
 		if err != nil {
 			h.log.With("error", err).Error("set topic")
 			return

@@ -8,9 +8,8 @@ import (
 
 type (
 	DialogRequest struct {
-		Text           string
-		Language       string
-		ConversationID string
+		Text     string
+		Language string
 
 		Questions []string
 		Answers   []string
@@ -23,8 +22,6 @@ type (
 
 const (
 	dialogPrompt = `
-	Let's imagine that you are teacher, have a dialog with your student. 
-
 Text to answer: %s
 
 Please provide response format with json(without any extra text, without formatting, only raw json, without newlines)
@@ -33,7 +30,7 @@ Here is an example of a response:
 "answer": text to continue dialog
 }
 
-Generate response in %s
+Generate response in %s and according to the previous question and answers.
 `
 )
 

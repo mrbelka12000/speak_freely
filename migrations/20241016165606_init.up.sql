@@ -30,8 +30,8 @@ CREATE TABLE "transcripts" (
 CREATE TABLE "themes" (
                               "id" SERIAL PRIMARY KEY,
                               "level" VARCHAR(3) NOT NULL,
-                              "topic" TEXT NOT NULL,
-                              "question" TEXT NOT NULL,
+                              "topic_id" INTEGER NOT NULL,
+                              "question" TEXT UNIQUE NOT NULL,
                               "language_id" INTEGER NOT NULL
 );
 
@@ -40,6 +40,13 @@ CREATE TABLE "languages" (
                              "long_name" VARCHAR(50) NOT NULL,
                              "short_name" VARCHAR(10) NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS topics(
+                                     "id" SERIAL PRIMARY KEY,
+                                     "language_id" INTEGER NOT NULL,
+                                     "name" text NOT NULL
+);
+
 
 ALTER TABLE "transcripts" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
@@ -50,3 +57,7 @@ ALTER TABLE "transcripts" ADD FOREIGN KEY ("language_id") REFERENCES "languages"
 ALTER TABLE "users" ADD FOREIGN KEY ("language_id") REFERENCES "languages" ("id");
 
 ALTER TABLE "themes" ADD FOREIGN KEY ("language_id") REFERENCES "languages" ("id");
+
+ALTER TABLE "themes" ADD FOREIGN KEY ("topic_id") REFERENCES "topics" ("id");
+
+
