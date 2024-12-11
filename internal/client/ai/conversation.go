@@ -44,7 +44,7 @@ func (c *Client) Dialog(ctx context.Context, req DialogRequest) (obj DialogRespo
 	)
 
 	for i, question := range req.Questions {
-		if i >= len(req.Questions) {
+		if i >= len(req.Answers) {
 			break
 		}
 		msg = append(msg, Message{
