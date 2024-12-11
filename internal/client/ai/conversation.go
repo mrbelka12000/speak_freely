@@ -11,6 +11,9 @@ type (
 		Text           string
 		Language       string
 		ConversationID string
+
+		Questions []string
+		Answers   []string
 	}
 
 	DialogResponse struct {
@@ -31,22 +34,39 @@ Here is an example of a response:
 }
 
 Generate response in %s
-Save information for conversation %s and answer with information according to this ID  
 `
 )
 
 func (c *Client) Dialog(ctx context.Context, req DialogRequest) (obj DialogResponse, err error) {
-	var out Out
+	var (
+		out Out
+		msg []Message
+	)
+
+	for i, question := range req.Questions {
+		if i >= len(req.Questions) {
+			break
+		}
+		msg = append(msg, Message{
+			Role:    "question",
+			Content: question,
+		})
+
+		msg = append(msg, Message{
+			Role:    "assistant",
+			Content: req.Answers[i],
+		})
+	}
+
+	msg = append(msg, Message{
+		Role:    "user",
+		Content: fmt.Sprintf(dialogPrompt, req.Text, req.Language, req.ConversationID),
+	})
 
 	err = c.do(ctx,
 		In{
-			Model: c.gptModel,
-			Messages: []Message{
-				{
-					Role:    "user",
-					Content: fmt.Sprintf(dialogPrompt, req.Text, req.Language, req.ConversationID),
-				},
-			},
+			Model:    c.gptModel,
+			Messages: msg,
 		},
 		&out,
 	)
