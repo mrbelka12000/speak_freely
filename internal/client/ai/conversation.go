@@ -48,7 +48,7 @@ func (c *Client) Dialog(ctx context.Context, req DialogRequest) (obj DialogRespo
 			break
 		}
 		msg = append(msg, Message{
-			Role:    "question",
+			Role:    "user",
 			Content: question,
 		})
 
@@ -60,7 +60,7 @@ func (c *Client) Dialog(ctx context.Context, req DialogRequest) (obj DialogRespo
 
 	msg = append(msg, Message{
 		Role:    "user",
-		Content: fmt.Sprintf(dialogPrompt, req.Text, req.Language, req.ConversationID),
+		Content: fmt.Sprintf(dialogPrompt, req.Text, req.Language),
 	})
 
 	err = c.do(ctx,
