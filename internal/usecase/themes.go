@@ -80,7 +80,8 @@ func (uc *UseCase) ThemesGenerateWithAI(ctx context.Context, level string) error
 			Level:      pointer.Of(level),
 		})
 		if err != nil {
-			return fmt.Errorf("failed to create theme: %w", err)
+			uc.log.With("question", theme.Question).Info("found duplicate")
+			continue
 		}
 	}
 
