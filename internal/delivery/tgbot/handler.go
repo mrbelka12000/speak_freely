@@ -260,12 +260,12 @@ func (h *Handler) handleCommands(ctx context.Context, msg *tgbotapi.Message) (st
 
 	case "themes":
 
-		tMarkup, err := h.getThemes(msg.From.ID)
+		tMarkup, text, err := h.getThemes(msg.From.ID)
 		if err != nil {
 			return lsb.GetNothingFindMessage(language), nil
 		}
 
-		toSendMsg := tgbotapi.NewMessage(msg.Chat.ID, lsb.GetChooseThemeMessage(language))
+		toSendMsg := tgbotapi.NewMessage(msg.Chat.ID, lsb.GetChooseThemeMessage(language)+"\n"+text)
 		toSendMsg.ReplyMarkup = tMarkup
 		h.handleSendMessageError(h.bot.Send(toSendMsg))
 
