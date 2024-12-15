@@ -3,7 +3,6 @@ package usecase
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"strings"
@@ -93,7 +92,7 @@ func (uc *UseCase) TranscriptBuildFromURL(
 	}
 	defer uc.tx.Rollback(ctx)
 
-	user, err := uc.UserGet(ctx, models.UserGet{
+	user, err := uc.UserGet(ctx, models.UserGetPars{
 		ExternalID: fmt.Sprint(externalUserID),
 	})
 	if err != nil {
@@ -139,23 +138,6 @@ func (uc *UseCase) TranscriptBuildFromURL(
 	}
 
 	return getSuggestionResponseTG(text, suggestions), nil
-}
-
-func (uc *UseCase) TranscriptGet(ctx context.Context, id int64, user models.User) (models.Transcript, error) {
-	obj, err := uc.srv.Transcript.Get(ctx, id)
-	if err != nil {
-		return models.Transcript{}, err
-	}
-
-	if obj.UserID != user.ID {
-		return models.Transcript{}, errors.New("user not permitted to get others people transcript")
-	}
-
-	return obj, nil
-}
-
-func (uc *UseCase) TranscriptList(ctx context.Context, pars models.TranscriptListPars) ([]models.Transcript, int, error) {
-	return uc.srv.Transcript.List(ctx, pars)
 }
 
 func getSuggestionResponseTG(text string, s ai.SuggestionResponse) string {

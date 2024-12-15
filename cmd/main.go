@@ -12,7 +12,6 @@ import (
 	"github.com/mrbelka12000/speak_freely/internal"
 	"github.com/mrbelka12000/speak_freely/internal/client/ai"
 	"github.com/mrbelka12000/speak_freely/internal/client/assembly"
-	"github.com/mrbelka12000/speak_freely/internal/client/mail"
 	handler "github.com/mrbelka12000/speak_freely/internal/delivery/http/v1"
 	"github.com/mrbelka12000/speak_freely/internal/delivery/tgbot"
 	"github.com/mrbelka12000/speak_freely/internal/repository"
@@ -58,7 +57,6 @@ func main() {
 		cfg.AIToken,
 		ai.WithLogger(log),
 	)
-	mailClient := mail.New(cfg)
 	repo := repository.New(db)
 	srv := service.New(repo)
 
@@ -66,7 +64,6 @@ func main() {
 		srv,
 		repo.Tx,
 		validate.New(repo.User, repo.Language, repo.File, repo.Theme),
-		mailClient,
 		rCache,
 		aiClient,
 		minIOClient,
@@ -83,13 +80,13 @@ func main() {
 
 	internal.NewCron(uc, log, cfg).Start() // non blocking
 
-	h := handler.New(
+	r := mux.NewRouter()
+
+	handler.Init(
 		uc,
+		r,
 		handler.WithLogger(log),
 	)
-
-	r := mux.NewRouter()
-	h.InitRoutes(r)
 
 	s := server.New(r, cfg.HTTPPort)
 	log.With("port", cfg.HTTPPort).Info("Starting HTTP server")

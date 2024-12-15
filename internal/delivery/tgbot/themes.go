@@ -12,7 +12,7 @@ import (
 
 func (h *handler) getThemes(externalID int64) (empty tgbotapi.InlineKeyboardMarkup, err error) {
 	ctx := context.Background()
-	user, err := h.uc.UserGet(ctx, models.UserGet{ExternalID: fmt.Sprint(externalID)})
+	user, err := h.uc.UserGet(ctx, models.UserGetPars{ExternalID: fmt.Sprint(externalID)})
 	if err != nil {
 		return empty, fmt.Errorf("get user: %w", err)
 	}

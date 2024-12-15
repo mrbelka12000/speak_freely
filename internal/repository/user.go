@@ -23,12 +23,7 @@ func newUser(db *sql.DB) *user {
 func (u *user) Create(ctx context.Context, user models.UserCU) (id int64, err error) {
 	err = QueryRow(ctx, u.db, `
 		INSERT INTO users(
-			first_name,
-			last_name,
 			nickname,
-			email,
-			password,
-			auth_method,
 			language_id,
 			created_at,
 		    external_id
@@ -37,19 +32,9 @@ func (u *user) Create(ctx context.Context, user models.UserCU) (id int64, err er
 			$1,
 			$2,
 			$3,
-			$4,
-			$5,
-			$6,
-		 	$7,
-		    $8,
-		    $9
+			$4
 		) RETURNING id`,
-		pointer.Value(user.FirstName),
-		pointer.Value(user.LastName),
 		pointer.Value(user.Nickname),
-		pointer.Value(user.Email),
-		pointer.Value(user.Password),
-		user.AuthMethod,
 		pointer.Value(user.LanguageID),
 		user.CreatedAt,
 		pointer.Value(user.ExternalID),
@@ -62,7 +47,7 @@ func (u *user) Create(ctx context.Context, user models.UserCU) (id int64, err er
 }
 
 // Get
-func (u *user) Get(ctx context.Context, obj models.UserGet) (user models.User, err error) {
+func (u *user) Get(ctx context.Context, obj models.UserGetPars) (user models.User, err error) {
 	var (
 		queryWhere string
 		arg        any
@@ -78,26 +63,16 @@ func (u *user) Get(ctx context.Context, obj models.UserGet) (user models.User, e
 	err = QueryRow(ctx, u.db, `
 SELECT 
     id, 
-    first_name, 
-    last_name, 
     nickname, 
-    email, 
-    auth_method,
     created_at,
-    language_id,
-	confirmed
+    language_id
 FROM users
 `+queryWhere,
 		arg).Scan(
 		&user.ID,
-		&user.FirstName,
-		&user.LastName,
 		&user.Nickname,
-		&user.Email,
-		&user.AuthMethod,
 		&user.CreatedAt,
 		&user.LanguageID,
-		&user.Confirmed,
 	)
 	if err != nil {
 		return user, fmt.Errorf("get user: %w", err)
@@ -110,14 +85,9 @@ FROM users
 func (u *user) List(ctx context.Context, pars models.UserListPars) ([]models.User, int, error) {
 	querySelect := `
    SELECT id, 
-    first_name, 
-    last_name, 
     nickname, 
-    email, 
-    auth_method,
 	created_at,
 	language_id,
-	confirmed,
 	external_id
 `
 	queryFrom := "FROM users"
@@ -131,29 +101,9 @@ func (u *user) List(ctx context.Context, pars models.UserListPars) ([]models.Use
 		queryWhere += fmt.Sprintf(" id = $%v AND", len(args))
 	}
 
-	if pars.FirstName != nil {
-		args = append(args, *pars.FirstName)
-		queryWhere += fmt.Sprintf(" first_name = $%v AND", len(args))
-	}
-
-	if pars.LastName != nil {
-		args = append(args, *pars.LastName)
-		queryWhere += fmt.Sprintf(" last_name = $%v AND", len(args))
-	}
-
 	if pars.Nickname != nil {
 		args = append(args, *pars.Nickname)
 		queryWhere += fmt.Sprintf(" nickname = $%v AND", len(args))
-	}
-
-	if pars.Email != nil {
-		args = append(args, *pars.Email)
-		queryWhere += fmt.Sprintf(" email = $%v AND", len(args))
-	}
-
-	if pars.Confirmed != nil {
-		args = append(args, *pars.Confirmed)
-		queryWhere += fmt.Sprintf(" confirmed = $%v AND", len(args))
 	}
 
 	if pars.ExternalID != nil {
@@ -184,14 +134,9 @@ func (u *user) List(ctx context.Context, pars models.UserListPars) ([]models.Use
 		var user models.User
 		err := rows.Scan(
 			&user.ID,
-			&user.FirstName,
-			&user.LastName,
 			&user.Nickname,
-			&user.Email,
-			&user.AuthMethod,
 			&user.CreatedAt,
 			&user.LanguageID,
-			&user.Confirmed,
 			&user.ExternalID,
 		)
 		if err != nil {
@@ -209,7 +154,7 @@ func (u *user) List(ctx context.Context, pars models.UserListPars) ([]models.Use
 }
 
 // Update
-func (u *user) Update(ctx context.Context, pars models.UserGet, user models.UserCU) error {
+func (u *user) Update(ctx context.Context, pars models.UserGetPars, user models.UserCU) error {
 	queryUpdate := `
 UPDATE users
 SET 
@@ -224,29 +169,9 @@ SET
 		args = append(args, pars.ExternalID)
 	}
 
-	if user.FirstName != nil {
-		args = append(args, *user.FirstName)
-		queryUpdate += fmt.Sprintf(" first_name = $%v ,", len(args))
-	}
-
-	if user.LastName != nil {
-		args = append(args, *user.LastName)
-		queryUpdate += fmt.Sprintf(" last_name = $%v ,", len(args))
-	}
-
 	if user.Nickname != nil {
 		args = append(args, *user.Nickname)
 		queryUpdate += fmt.Sprintf(" nickname = $%v ,", len(args))
-	}
-
-	if user.Email != nil {
-		args = append(args, *user.Email)
-		queryUpdate += fmt.Sprintf(" email = $%v ,", len(args))
-	}
-
-	if user.Confirmed {
-		args = append(args, user.Confirmed)
-		queryUpdate += fmt.Sprintf(" confirmed = $%v ,", len(args))
 	}
 
 	if user.LanguageID != nil {
@@ -265,7 +190,7 @@ SET
 }
 
 // Delete
-func (u *user) Delete(ctx context.Context, obj models.UserGet) error {
+func (u *user) Delete(ctx context.Context, obj models.UserGetPars) error {
 
 	var (
 		queryWhere string
@@ -285,35 +210,4 @@ func (u *user) Delete(ctx context.Context, obj models.UserGet) error {
 	}
 
 	return nil
-}
-
-// FindByLogin
-func (u *user) FindByLogin(ctx context.Context, login string) (out models.User, err error) {
-	err = QueryRow(ctx, u.db, `
-SELECT 
-    id, 
-    first_name, 
-    last_name, 
-    nickname, 
-    email, 
-    auth_method,
-    created_at,
-    password
-FROM users
-WHERE nickname = $1 OR email = $1 AND auth_method = 1`,
-		login).Scan(
-		&out.ID,
-		&out.FirstName,
-		&out.LastName,
-		&out.Nickname,
-		&out.Email,
-		&out.AuthMethod,
-		&out.CreatedAt,
-		&out.Password,
-	)
-	if err != nil {
-		return out, fmt.Errorf("get user: %w", err)
-	}
-
-	return out, nil
 }

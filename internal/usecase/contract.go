@@ -6,14 +6,9 @@ import (
 	"time"
 
 	"github.com/mrbelka12000/speak_freely/internal/client/ai"
-	"github.com/mrbelka12000/speak_freely/internal/client/mail"
 )
 
 type (
-	mailSender interface {
-		Send(req mail.Request) error
-	}
-
 	txBuilder interface {
 		Begin(ctx context.Context) (context.Context, error)
 		Commit(ctx context.Context) error

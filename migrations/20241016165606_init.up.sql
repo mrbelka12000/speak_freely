@@ -1,12 +1,6 @@
 CREATE TABLE "users" (
                          "id" SERIAL PRIMARY KEY,
-                         "first_name" VARCHAR(50) NOT NULL,
-                         "last_name" VARCHAR(50) DEFAULT '',
                          "nickname" VARCHAR(50) UNIQUE NOT NULL,
-                         "email" VARCHAR(100) NOT NULL,
-                         "password" VARCHAR(200) NOT NULL,
-                         "auth_method" INTEGER DEFAULT 1,
-                         "confirmed" BOOLEAN DEFAULT false,
                          "created_at" BIGINT NOT NULL,
                          "language_id" INTEGER NOT NULL
 );

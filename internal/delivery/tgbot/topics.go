@@ -11,7 +11,7 @@ import (
 )
 
 func (h *handler) getTopics(ctx context.Context, externalID int64) tgbotapi.InlineKeyboardMarkup {
-	user, _ := h.uc.UserGet(ctx, models.UserGet{ExternalID: fmt.Sprint(externalID)})
+	user, _ := h.uc.UserGet(ctx, models.UserGetPars{ExternalID: fmt.Sprint(externalID)})
 
 	// Default language ID
 	var langID int64 = 1

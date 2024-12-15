@@ -1,13 +1,13 @@
 package v1
 
 import (
-	"encoding/json"
 	"log/slog"
 	"net/http"
 	"os"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/schema"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/mrbelka12000/speak_freely/internal/usecase"
 )
@@ -20,29 +20,24 @@ type (
 	}
 )
 
-// New
-func New(uc *usecase.UseCase, opts ...opt) *Handler {
-	key, ok := os.LookupEnv("SECRET_KEY")
-	if !ok {
-		panic("no secret key provided")
-	}
-	secretKey = []byte(key)
+// Init
+func Init(uc *usecase.UseCase, router *mux.Router, opts ...opt) {
 
 	h := &Handler{
-		uc:      uc,
-		log:     slog.New(slog.NewJSONHandler(os.Stdout, nil)),
-		decoder: schema.NewDecoder(),
+		uc:  uc,
+		log: slog.New(slog.NewJSONHandler(os.Stdout, nil)),
 	}
 
 	for _, opt := range opts {
 		opt(h)
 	}
 
-	return h
+	h.initRoutes(router)
+	return
 }
 
 // InitRoutes
-func (h *Handler) InitRoutes(r *mux.Router) {
+func (h *Handler) initRoutes(r *mux.Router) {
 	r.Use(h.recovery)
 	r.Use(h.cors)
 
@@ -50,45 +45,5 @@ func (h *Handler) InitRoutes(r *mux.Router) {
 		w.WriteHeader(http.StatusOK)
 	})
 
-	// users
-	r.HandleFunc("/api/v1/register", h.Registration).Methods(http.MethodPost)
-	r.HandleFunc("/api/v1/login", h.Login).Methods(http.MethodPost)
-	r.HandleFunc("/api/v1/confirm", h.ConfirmEmail)
-	r.HandleFunc("/api/v1/profile", h.authenticateMiddleware(h.UpdateProfile, true)).Methods(http.MethodPut)
-	r.HandleFunc("/api/v1/profile", h.authenticateMiddleware(h.Profile, true)).Methods(http.MethodGet)
-	r.HandleFunc("/api/v1/users", h.authenticateMiddleware(h.UsersList, true)).Methods(http.MethodGet)
-
-	// languages
-	r.HandleFunc("/api/v1/lang", h.authenticateMiddleware(h.LanguageCreate, true)).Methods(http.MethodPost)
-	r.HandleFunc("/api/v1/langs", h.LanguageList)
-
-	//themes
-	r.HandleFunc("/api/v1/theme/{id}", h.authenticateMiddleware(h.GetTheme, false)).Methods(http.MethodGet)
-	r.HandleFunc("/api/v1/theme", h.authenticateMiddleware(h.CreateTheme, true)).Methods(http.MethodPost)
-	r.HandleFunc("/api/v1/theme", h.ThemesList).Methods(http.MethodGet)
-
-	// transcripts
-	r.HandleFunc("/api/v1/transcript", h.authenticateMiddleware(h.TranscriptCreate, true)).Methods(http.MethodPost)
-	r.HandleFunc("/api/v1/transcript/{id}", h.authenticateMiddleware(h.TranscriptGet, true)).Methods(http.MethodGet)
-	r.HandleFunc("/api/v1/transcript", h.TranscriptList).Methods(http.MethodGet)
-
-	// tokens
-	r.HandleFunc("/api/v1/tokens", h.Tokens)
-}
-
-func (h *Handler) writeError(w http.ResponseWriter, err error, code int) {
-	errResp := struct {
-		Error string `json:"error"`
-	}{
-		Error: err.Error(),
-	}
-
-	writeJson(w, errResp, code)
-}
-
-func writeJson(w http.ResponseWriter, data interface{}, httpStatus int) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(httpStatus)
-	body, _ := json.Marshal(data)
-	w.Write(body)
+	r.Handle("/metrics", promhttp.Handler())
 }

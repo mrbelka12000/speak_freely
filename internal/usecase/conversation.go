@@ -20,7 +20,7 @@ func (uc *UseCase) Conversation(
 	externalUserID int64,
 ) (string, error) {
 
-	user, err := uc.UserGet(ctx, models.UserGet{
+	user, err := uc.UserGet(ctx, models.UserGetPars{
 		ExternalID: fmt.Sprint(externalUserID),
 	})
 	if err != nil {

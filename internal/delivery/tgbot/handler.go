@@ -120,14 +120,11 @@ func (h *handler) handleUpdate() {
 		tgUser := msg.From
 		switch msg.Command() {
 		case "start":
-			_, err := h.uc.UserGet(ctx, models.UserGet{ExternalID: fmt.Sprint(tgUser.ID)})
+			_, err := h.uc.UserGet(ctx, models.UserGetPars{ExternalID: fmt.Sprint(tgUser.ID)})
 			if err != nil {
 				// user not exists, create
 				obj := models.UserCU{
-					FirstName:  pointer.Of(tgUser.FirstName),
-					LastName:   pointer.Of(tgUser.LastName),
 					Nickname:   pointer.Of(tgUser.UserName),
-					AuthMethod: lsb.AuthMethodTG,
 					LanguageID: pointer.Of(int64(1)),
 					ExternalID: pointer.Of(fmt.Sprint(tgUser.ID)),
 				}
@@ -196,7 +193,7 @@ func (h *handler) handleUpdate() {
 			toSendMsg.ReplyMarkup = getLevels()
 			h.handleSendMessageError(h.bot.Send(toSendMsg))
 		case "help":
-			user, _ := h.uc.UserGet(ctx, models.UserGet{ExternalID: fmt.Sprint(tgUser.ID)})
+			user, _ := h.uc.UserGet(ctx, models.UserGetPars{ExternalID: fmt.Sprint(tgUser.ID)})
 			faq := lsb.GetFAQ(pointer.Value(user.Language).ShortName)
 			toSendMsg := tgbotapi.NewMessage(msg.Chat.ID, faq)
 			h.handleSendMessageError(h.bot.Send(toSendMsg))
@@ -220,11 +217,10 @@ func (h *handler) handleCallbacks(ctx context.Context, cb *tgbotapi.CallbackQuer
 	switch cbData.Action {
 	case actionChooseLanguage:
 
-		_, err := h.uc.UserUpdate(ctx, models.UserGet{
+		_, err := h.uc.UserUpdate(ctx, models.UserGetPars{
 			ExternalID: fmt.Sprint(tgUser.ID),
 		}, models.UserCU{
 			LanguageID: pointer.Of(cbData.LangC.ID),
-			AuthMethod: lsb.AuthMethodTG,
 		})
 		if err != nil {
 			h.log.With("error", err).Error("update user")
