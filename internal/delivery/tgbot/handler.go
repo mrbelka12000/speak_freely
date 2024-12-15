@@ -203,7 +203,7 @@ func (h *Handler) handleUpdate() {
 
 func (h *Handler) handleCommands(ctx context.Context, msg *tgbotapi.Message) (string, error) {
 	userID := msg.From.ID
-
+	//
 	language, ok := h.cache.Get(getLanguageKey(userID))
 	if !ok {
 		user, err := h.uc.UserGet(ctx, models.UserGetPars{ExternalID: fmt.Sprint(userID)})
