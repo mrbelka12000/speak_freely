@@ -6,8 +6,10 @@ import (
 	"strings"
 	"time"
 
+	lsb "github.com/mrbelka12000/speak_freely"
 	"github.com/mrbelka12000/speak_freely/internal/client/ai"
 	"github.com/mrbelka12000/speak_freely/internal/models"
+	"github.com/mrbelka12000/speak_freely/pkg/pointer"
 )
 
 const (
@@ -19,6 +21,11 @@ func (uc *UseCase) Conversation(
 	fileURL string,
 	externalUserID int64,
 ) (string, error) {
+	ctx, err := uc.tx.Begin(ctx)
+	if err != nil {
+		return "", fmt.Errorf("begin transaction: %w", err)
+	}
+	defer uc.tx.Rollback(ctx)
 
 	user, err := uc.UserGet(ctx, models.UserGetPars{
 		ExternalID: fmt.Sprint(externalUserID),
@@ -31,7 +38,11 @@ func (uc *UseCase) Conversation(
 		prevBotAnswers, prevUserAnswer []string
 	)
 
-	userAnswer, err := uc.transcriber.GetDataFromURL(ctx, fileURL, user.Language.ShortName)
+	if user.RemainingTime <= 0 && !user.Payed {
+		return lsb.GetReachedLimitMessage(pointer.Value(user.Language).ShortName), nil
+	}
+
+	fileData, err := uc.transcriber.GetDataFromURL(ctx, fileURL, user.Language.ShortName)
 	if err != nil {
 		return "", fmt.Errorf("get user answer from message: %w", err)
 	}
@@ -47,7 +58,7 @@ func (uc *UseCase) Conversation(
 	}
 
 	dialog, err := uc.gen.Dialog(ctx, ai.DialogRequest{
-		Text:      userAnswer.Text,
+		Text:      fileData.Text,
 		Language:  user.Language.LongName,
 		Questions: prevUserAnswer,
 		Answers:   prevBotAnswers,
@@ -61,9 +72,21 @@ func (uc *UseCase) Conversation(
 		uc.log.With("error", err).Error("can not save answer")
 	}
 
-	err = uc.saveUserAnswer(externalUserID, userAnswer.Text)
+	err = uc.saveUserAnswer(externalUserID, fileData.Text)
 	if err != nil {
 		uc.log.With("error", err).Error("can not save userAnswer")
+	}
+
+	err = uc.UserUpdate(ctx, models.UserGetPars{ID: user.ID}, models.UserCU{
+		RemainingTime: pointer.Of(int64(fileData.AudioDuration) * -1),
+	})
+	if err != nil {
+		return "", fmt.Errorf("update user info: %w", err)
+	}
+
+	err = uc.tx.Commit(ctx)
+	if err != nil {
+		return "", fmt.Errorf("commit transaction: %w", err)
 	}
 
 	return dialog.Answer, nil
