@@ -9,7 +9,7 @@ import (
 	"github.com/mrbelka12000/speak_freely/pkg/pointer"
 )
 
-func (h *handler) getLanguages() (empty tgbotapi.InlineKeyboardMarkup, err error) {
+func (h *Handler) getLanguages() (empty tgbotapi.InlineKeyboardMarkup, err error) {
 	languages, count, err := h.uc.LanguageList(context.Background())
 	if err != nil {
 		return empty, fmt.Errorf("can not get languages: %w", err)

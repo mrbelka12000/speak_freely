@@ -20,14 +20,14 @@ func (uc *UseCase) UserCreate(ctx context.Context, user models.UserCU) (int64, m
 }
 
 // UserUpdate
-func (uc *UseCase) UserUpdate(ctx context.Context, pars models.UserGetPars, user models.UserCU) (map[string]validate.RequiredField, error) {
+func (uc *UseCase) UserUpdate(ctx context.Context, pars models.UserGetPars, user models.UserCU) error {
 
 	err := uc.srv.User.Update(ctx, pars, user)
 	if err != nil {
-		return nil, fmt.Errorf("update user: %w", err)
+		return fmt.Errorf("update user: %w", err)
 	}
 
-	return nil, nil
+	return nil
 }
 
 // UserGet

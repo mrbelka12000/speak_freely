@@ -9,3 +9,7 @@ import (
 func (uc *UseCase) TopicList(ctx context.Context, languageID int64) ([]models.Topic, error) {
 	return uc.srv.Topic.List(ctx, languageID)
 }
+
+func (uc *UseCase) TopicGet(ctx context.Context, id int64) (models.Topic, error) {
+	return uc.srv.Topic.Get(ctx, id)
+}

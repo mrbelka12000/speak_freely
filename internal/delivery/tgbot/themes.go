@@ -10,7 +10,7 @@ import (
 	"github.com/mrbelka12000/speak_freely/pkg/pointer"
 )
 
-func (h *handler) getThemes(externalID int64) (empty tgbotapi.InlineKeyboardMarkup, err error) {
+func (h *Handler) getThemes(externalID int64) (empty tgbotapi.InlineKeyboardMarkup, err error) {
 	ctx := context.Background()
 	user, err := h.uc.UserGet(ctx, models.UserGetPars{ExternalID: fmt.Sprint(externalID)})
 	if err != nil {

@@ -1,0 +1,17 @@
+BEGIN;
+
+ALTER TABLE users ADD COLUMN IF NOT EXISTS  payed BOOLEAN DEFAULT FALSE;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS  remaining_time INTEGER default 600;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS  is_redeem_used BOOLEAN DEFAULT False;
+
+
+CREATE TABLE IF NOT EXISTS billing_info(
+    "id" SERIAL PRIMARY KEY,
+    "user_id" INTEGER NOT NULL,
+    "chat_id" INTEGER NOT NULL,
+    "debit_date" TIMESTAMP NOT NULL
+);
+
+ALTER TABLE "billing_info" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+
+COMMIT;

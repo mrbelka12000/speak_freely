@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/mrbelka12000/speak_freely/internal/client/ai"
+	"github.com/mrbelka12000/speak_freely/internal/client/assembly"
 )
 
 type (
@@ -33,7 +34,7 @@ type (
 	}
 
 	transcriber interface {
-		GetTextFromFile(ctx context.Context, file io.Reader, lang string) (string, error)
-		GetTextFromURL(ctx context.Context, url, languageCode string) (string, error)
+		GetDataFromFile(ctx context.Context, file io.Reader, lang string) (assembly.FileData, error)
+		GetDataFromURL(ctx context.Context, url, languageCode string) (assembly.FileData, error)
 	}
 )

@@ -27,83 +27,84 @@ func (uc *UseCase) Conversation(
 		return "", fmt.Errorf("get user: %w", err)
 	}
 
-	question, err := uc.transcriber.GetTextFromURL(ctx, fileURL, user.Language.ShortName)
-	if err != nil {
-		return "", fmt.Errorf("get question from message: %w", err)
-	}
-
 	var (
-		prevAnswers, prevQuestions []string
+		prevBotAnswers, prevUserAnswer []string
 	)
-	answerCache, ok := uc.getAnswer(externalUserID)
-	if ok {
-		prevAnswers = strings.Split(answerCache, "---")
+
+	userAnswer, err := uc.transcriber.GetDataFromURL(ctx, fileURL, user.Language.ShortName)
+	if err != nil {
+		return "", fmt.Errorf("get user answer from message: %w", err)
 	}
 
-	questionCache, ok := uc.getQuestion(externalUserID)
+	botAnswerCache, ok := uc.getBotAnswer(externalUserID)
 	if ok {
-		prevQuestions = strings.Split(questionCache, "---")
+		prevBotAnswers = strings.Split(botAnswerCache, "---")
+	}
+
+	questionCache, ok := uc.getUserAnswer(externalUserID)
+	if ok {
+		prevUserAnswer = strings.Split(questionCache, "---")
 	}
 
 	dialog, err := uc.gen.Dialog(ctx, ai.DialogRequest{
-		Text:      question,
+		Text:      userAnswer.Text,
 		Language:  user.Language.LongName,
-		Questions: prevQuestions,
-		Answers:   prevAnswers,
+		Questions: prevUserAnswer,
+		Answers:   prevBotAnswers,
 	})
 	if err != nil {
 		return "", fmt.Errorf("get dialog: %w", err)
 	}
 
-	err = uc.saveAnswer(externalUserID, dialog.Answer)
+	err = uc.saveBotAnswer(externalUserID, dialog.Answer)
 	if err != nil {
 		uc.log.With("error", err).Error("can not save answer")
 	}
 
-	err = uc.saveQuestion(externalUserID, question)
+	err = uc.saveUserAnswer(externalUserID, userAnswer.Text)
 	if err != nil {
-		uc.log.With("error", err).Error("can not save question")
+		uc.log.With("error", err).Error("can not save userAnswer")
 	}
 
 	return dialog.Answer, nil
 }
 
-func (uc *UseCase) saveAnswer(externalUserID int64, text string) error {
-	answer, ok := uc.cache.Get(GetAnswerKey(externalUserID))
+func (uc *UseCase) saveBotAnswer(externalUserID int64, text string) error {
+	answer, ok := uc.cache.Get(GetBotAnswerKey(externalUserID))
 	if ok {
 		answer = fmt.Sprintf("%s---%s", answer, text)
 	} else {
 		answer = text
 	}
 
-	return uc.cache.Set(GetAnswerKey(externalUserID), answer, saveDuration)
+	return uc.cache.Set(GetBotAnswerKey(externalUserID), answer, saveDuration)
 }
 
-func (uc *UseCase) getAnswer(externalUserID int64) (string, bool) {
-	answer, ok := uc.cache.Get(GetAnswerKey(externalUserID))
+func (uc *UseCase) getBotAnswer(externalUserID int64) (string, bool) {
+	answer, ok := uc.cache.Get(GetBotAnswerKey(externalUserID))
 	return answer, ok
 }
 
-func GetAnswerKey(externalUserID int64) string {
-	return fmt.Sprintf("answer_%d", externalUserID)
+func GetBotAnswerKey(externalUserID int64) string {
+	return fmt.Sprintf("bot_answer_%d", externalUserID)
 }
 
-func (uc *UseCase) saveQuestion(externalUserID int64, text string) error {
-	question, ok := uc.cache.Get(GetQuestionKey(externalUserID))
+func (uc *UseCase) saveUserAnswer(externalUserID int64, text string) error {
+	question, ok := uc.cache.Get(GetUserAnswerKey(externalUserID))
 	if ok {
 		question = fmt.Sprintf("%s---%s", question, text)
 	} else {
 		question = text
 	}
 
-	return uc.cache.Set(GetQuestionKey(externalUserID), question, saveDuration)
+	return uc.cache.Set(GetUserAnswerKey(externalUserID), question, saveDuration)
 }
 
-func (uc *UseCase) getQuestion(externalUserID int64) (string, bool) {
-	question, ok := uc.cache.Get(GetQuestionKey(externalUserID))
+func (uc *UseCase) getUserAnswer(externalUserID int64) (string, bool) {
+	question, ok := uc.cache.Get(GetUserAnswerKey(externalUserID))
 	return question, ok
 }
 
-func GetQuestionKey(externalUserID int64) string {
-	return fmt.Sprintf("question_%d", externalUserID)
+func GetUserAnswerKey(externalUserID int64) string {
+	return fmt.Sprintf("user_answer_%d", externalUserID)
 }

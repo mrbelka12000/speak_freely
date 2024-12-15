@@ -9,3 +9,7 @@ import (
 func (uc *UseCase) LanguageList(ctx context.Context) ([]models.Language, int, error) {
 	return uc.srv.Language.List(ctx)
 }
+
+func (uc *UseCase) LanguageGet(ctx context.Context, id int64) (models.Language, error) {
+	return uc.srv.Language.Get(ctx, id)
+}

@@ -72,13 +72,13 @@ func main() {
 		usecase.WithLogger(log),
 	)
 
-	err = tgbot.Start(cfg, uc, log, rCache) // non blocking
+	tgHandler, err := tgbot.Start(cfg, uc, log, rCache) // non blocking
 	if err != nil {
 		log.With("error", err).Error("failed to start tgbot")
 		return
 	}
 
-	internal.NewCron(uc, log, cfg).Start() // non blocking
+	internal.NewCron(uc, tgHandler, log, cfg).Start() // non blocking
 
 	r := mux.NewRouter()
 

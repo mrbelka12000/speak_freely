@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math"
 	"strings"
 
+	lsb "github.com/mrbelka12000/speak_freely"
 	"github.com/mrbelka12000/speak_freely/internal/client/ai"
 	"github.com/mrbelka12000/speak_freely/internal/models"
 	"github.com/mrbelka12000/speak_freely/internal/validate"
@@ -45,13 +47,13 @@ func (uc *UseCase) TranscriptBuild(
 		return 0, nil, fmt.Errorf("get language: %w", err)
 	}
 
-	text, err := uc.transcriber.GetTextFromFile(ctx, file, lang.ShortName)
+	fileData, err := uc.transcriber.GetDataFromFile(ctx, file, lang.ShortName)
 	if err != nil {
-		return 0, nil, fmt.Errorf("get text: %w", err)
+		return 0, nil, fmt.Errorf("get file data: %w", err)
 	}
 
 	obj := models.TranscriptCU{
-		Text:       pointer.Of(text),
+		Text:       pointer.Of(fileData.Text),
 		LanguageID: pointer.Of(languageID),
 		UserID:     pointer.Of(userID),
 		FileID:     pointer.Of(fileID),
@@ -99,9 +101,13 @@ func (uc *UseCase) TranscriptBuildFromURL(
 		return "", fmt.Errorf("get user: %w", err)
 	}
 
-	text, err := uc.transcriber.GetTextFromURL(ctx, fileURL, user.Language.ShortName)
+	if user.RemainingTime <= 0 && !user.Payed {
+		return lsb.GetReachedLimitMessage(pointer.Value(user.Language).ShortName), nil
+	}
+
+	fileData, err := uc.transcriber.GetDataFromURL(ctx, fileURL, user.Language.ShortName)
 	if err != nil {
-		return "", fmt.Errorf("get text from message: %w", err)
+		return "", fmt.Errorf("get file data from message: %w", err)
 	}
 
 	theme, err := uc.ThemeGet(ctx, themeID)
@@ -110,7 +116,7 @@ func (uc *UseCase) TranscriptBuildFromURL(
 	}
 
 	suggestions, err := uc.gen.GetSuggestions(ctx, ai.SuggestionRequest{
-		Text:     text,
+		Text:     fileData.Text,
 		Topic:    theme.Topic.Name,
 		Question: theme.Question,
 		Language: user.Language.LongName,
@@ -121,7 +127,7 @@ func (uc *UseCase) TranscriptBuildFromURL(
 	suggestionRaw, _ := json.Marshal(suggestions)
 
 	_, err = uc.srv.Transcript.Create(ctx, models.TranscriptCU{
-		Text:       pointer.Of(text),
+		Text:       pointer.Of(fileData.Text),
 		LanguageID: pointer.Of(user.LanguageID),
 		UserID:     pointer.Of(user.ID),
 		ThemeID:    pointer.Of(themeID),
@@ -132,12 +138,22 @@ func (uc *UseCase) TranscriptBuildFromURL(
 		return "", fmt.Errorf("create transcript: %w", err)
 	}
 
+	err = uc.srv.User.Update(ctx,
+		models.UserGetPars{ID: user.ID},
+		models.UserCU{
+			RemainingTime: pointer.Of(int64(math.Round(fileData.AudioDuration)) * -1),
+		},
+	)
+	if err != nil {
+		fmt.Println(err, "suka")
+	}
+
 	err = uc.tx.Commit(ctx)
 	if err != nil {
 		return "", fmt.Errorf("commit transaction: %w", err)
 	}
 
-	return getSuggestionResponseTG(text, suggestions), nil
+	return getSuggestionResponseTG(fileData.Text, suggestions), nil
 }
 
 func getSuggestionResponseTG(text string, s ai.SuggestionResponse) string {

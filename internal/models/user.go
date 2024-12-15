@@ -3,12 +3,14 @@ package models
 type (
 	// User general user information
 	User struct {
-		ID         int64  `json:"id"`
-		Nickname   string `json:"nickname"`
-		Password   string `json:"password,omitempty"`
-		CreatedAt  int64  `json:"created_at"`
-		LanguageID int64  `json:"language_id"`
-		ExternalID string `json:"external_id"`
+		ID            int64  `json:"id"`
+		Nickname      string `json:"nickname"`
+		CreatedAt     int64  `json:"created_at"`
+		LanguageID    int64  `json:"language_id"`
+		ExternalID    string `json:"external_id"`
+		Payed         bool   `json:"payed"`
+		RemainingTime int64  `json:"remaining_time"`
+		IsRedeemUsed  bool   `json:"used_redeem"`
 
 		Language *Language `json:"first_language,omitempty"`
 	}
@@ -20,10 +22,13 @@ type (
 
 	// UserCU object to create/update user information
 	UserCU struct {
-		Nickname   *string `json:"nickname"`
-		LanguageID *int64  `json:"language_id"`
-		CreatedAt  int64   `json:"created_at"`
-		ExternalID *string `json:"external_id"`
+		Nickname      *string `json:"nickname"`
+		LanguageID    *int64  `json:"language_id"`
+		ExternalID    *string `json:"external_id"`
+		RemainingTime *int64  `json:"remaining_time"`
+		Payed         *bool   `json:"payed"`
+		IsRedeemUsed  *bool   `json:"used_redeem"`
+		CreatedAt     int64   `json:"created_at"`
 	}
 
 	// UserListPars for list users

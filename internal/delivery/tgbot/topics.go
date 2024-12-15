@@ -10,7 +10,7 @@ import (
 	"github.com/mrbelka12000/speak_freely/pkg/pointer"
 )
 
-func (h *handler) getTopics(ctx context.Context, externalID int64) tgbotapi.InlineKeyboardMarkup {
+func (h *Handler) getTopics(ctx context.Context, externalID int64) tgbotapi.InlineKeyboardMarkup {
 	user, _ := h.uc.UserGet(ctx, models.UserGetPars{ExternalID: fmt.Sprint(externalID)})
 
 	// Default language ID

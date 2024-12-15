@@ -65,7 +65,11 @@ SELECT
     id, 
     nickname, 
     created_at,
-    language_id
+    language_id,
+    external_id,
+	payed,
+	remaining_time,
+	is_redeem_used
 FROM users
 `+queryWhere,
 		arg).Scan(
@@ -73,6 +77,10 @@ FROM users
 		&user.Nickname,
 		&user.CreatedAt,
 		&user.LanguageID,
+		&user.ExternalID,
+		&user.Payed,
+		&user.RemainingTime,
+		&user.IsRedeemUsed,
 	)
 	if err != nil {
 		return user, fmt.Errorf("get user: %w", err)
@@ -88,7 +96,9 @@ func (u *user) List(ctx context.Context, pars models.UserListPars) ([]models.Use
     nickname, 
 	created_at,
 	language_id,
-	external_id
+	external_id,
+	payed,
+	remaining_time
 `
 	queryFrom := "FROM users"
 	queryWhere := " WHERE "
@@ -138,6 +148,8 @@ func (u *user) List(ctx context.Context, pars models.UserListPars) ([]models.Use
 			&user.CreatedAt,
 			&user.LanguageID,
 			&user.ExternalID,
+			&user.Payed,
+			&user.RemainingTime,
 		)
 		if err != nil {
 			return nil, 0, fmt.Errorf("scan user: %w", err)
@@ -179,6 +191,21 @@ SET
 		queryUpdate += fmt.Sprintf(" language_id = $%v ,", len(args))
 	}
 
+	if user.RemainingTime != nil {
+		args = append(args, *user.RemainingTime)
+		queryUpdate += fmt.Sprintf(" remaining_time = remaining_time + $%v ,", len(args))
+	}
+
+	if user.Payed != nil {
+		args = append(args, *user.Payed)
+		queryUpdate += fmt.Sprintf(" payed = $%v ,", len(args))
+	}
+
+	if user.IsRedeemUsed != nil {
+		args = append(args, *user.IsRedeemUsed)
+		queryUpdate += fmt.Sprintf(" is_redeem_used = $%v ,", len(args))
+	}
+
 	queryUpdate = queryUpdate[:len(queryUpdate)-1]
 
 	_, err := Exec(ctx, u.db, queryUpdate+queryWhere, args...)
@@ -199,7 +226,7 @@ func (u *user) Delete(ctx context.Context, obj models.UserGetPars) error {
 	if obj.ID != 0 {
 		queryWhere = "WHERE id = $1"
 		arg = obj.ID
-	} else if obj.ExternalID != "" {
+	} else {
 		queryWhere = "WHERE external_id = $1"
 		arg = obj.ExternalID
 	}

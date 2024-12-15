@@ -6,12 +6,21 @@ import (
 	"io"
 
 	aai "github.com/AssemblyAI/assemblyai-go-sdk"
+
+	"github.com/mrbelka12000/speak_freely/pkg/pointer"
 )
 
-// Client
-type Client struct {
-	client *aai.Client
-}
+type (
+	// Client
+	Client struct {
+		client *aai.Client
+	}
+
+	FileData struct {
+		Text          string
+		AudioDuration float64
+	}
+)
 
 // New
 func New(apiKey string) *Client {
@@ -20,28 +29,34 @@ func New(apiKey string) *Client {
 	}
 }
 
-func (c *Client) GetTextFromFile(ctx context.Context, file io.Reader, lang string) (string, error) {
+func (c *Client) GetDataFromFile(ctx context.Context, file io.Reader, lang string) (out FileData, err error) {
 	params := &aai.TranscriptOptionalParams{
 		LanguageCode: aai.TranscriptLanguageCode(lang),
 	}
 
 	resp, err := c.client.Transcripts.TranscribeFromReader(ctx, file, params)
 	if err != nil {
-		return "", fmt.Errorf("transcribe from file: %w", err)
+		return out, fmt.Errorf("transcribe from file: %w", err)
 	}
 
-	return aai.ToString(resp.Text), nil
+	return FileData{
+		Text:          pointer.Value(resp.Text),
+		AudioDuration: pointer.Value(resp.AudioDuration),
+	}, nil
 }
 
-func (c *Client) GetTextFromURL(ctx context.Context, url, languageCode string) (string, error) {
+func (c *Client) GetDataFromURL(ctx context.Context, url, languageCode string) (out FileData, err error) {
 	params := aai.TranscriptOptionalParams{
 		LanguageCode: aai.TranscriptLanguageCode(languageCode),
 	}
 
-	transcript, err := c.client.Transcripts.TranscribeFromURL(ctx, url, &params)
+	resp, err := c.client.Transcripts.TranscribeFromURL(ctx, url, &params)
 	if err != nil {
-		return "", err
+		return out, err
 	}
 
-	return aai.ToString(transcript.Text), nil
+	return FileData{
+		Text:          pointer.Value(resp.Text),
+		AudioDuration: pointer.Value(resp.AudioDuration),
+	}, nil
 }
