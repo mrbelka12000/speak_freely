@@ -53,7 +53,7 @@ func (uc *UseCase) ApplyCoupon(ctx context.Context, externalID int64, coupon str
 			ExternalID: fmt.Sprint(externalID),
 		},
 		models.UserCU{
-			RemainingTime: pointer.Of(int64(3 * 60 * 60)),
+			RemainingTime: pointer.Of(int64(3 * 60)),
 			IsRedeemUsed:  pointer.Of(true),
 		},
 	)
