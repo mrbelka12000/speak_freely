@@ -87,6 +87,19 @@ func (c *Cron) checkSubscriptionExpiration() {
 				c.log.With("error", err).Error("failed to update billing info")
 				continue
 			}
+
+			err = c.uc.UserUpdate(context.Background(),
+				models.UserGetPars{
+					ID: bi.ID,
+				},
+				models.UserCU{
+					RemainingTime: pointer.Of(int64(600)),
+					Payed:         pointer.Of(false),
+				},
+			)
+			if err != nil {
+				c.log.With("error", err).Error("failed to update user subscription")
+			}
 		}
 	}
 
