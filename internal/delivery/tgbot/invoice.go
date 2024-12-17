@@ -65,8 +65,8 @@ func (h *Handler) sendInvoice(msg *tgbotapi.Message) error {
 		BaseChat: tgbotapi.BaseChat{
 			ChatID: msg.Chat.ID,
 		},
-		Title:       "Unlimited access",
-		Description: "Get unlimited access to the speaking, discussing, and improving language skills",
+		Title:       "Payment",
+		Description: "Get access for 1 month to the speaking, discussing, and improving language skills",
 		Payload:     payload,
 		Currency:    "XTR",
 		Prices: []tgbotapi.LabeledPrice{
