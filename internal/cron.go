@@ -90,7 +90,7 @@ func (c *Cron) checkSubscriptionExpiration() {
 
 			err = c.uc.UserUpdate(context.Background(),
 				models.UserGetPars{
-					ID: bi.ID,
+					ID: bi.UserID,
 				},
 				models.UserCU{
 					RemainingTime: pointer.Of(int64(600)),
