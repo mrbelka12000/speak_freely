@@ -49,24 +49,30 @@ func (h *Handler) getThemes(externalID int64) (empty tgbotapi.InlineKeyboardMark
 		return empty, "", fmt.Errorf("get themes: no themes found")
 	}
 
-	var response strings.Builder
+	var (
+		response strings.Builder
+		numbers  = []string{"1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "1️⃣0️⃣"}
+	)
 
 	buttons := make([][]tgbotapi.InlineKeyboardButton, 0, count)
+	button := make([]tgbotapi.InlineKeyboardButton, 0, 2)
 	for i, theme := range themes {
 
-		response.WriteString(fmt.Sprintf("%d) %s\n", i+1, theme.Question))
-		buttons = append(buttons, []tgbotapi.InlineKeyboardButton{
-			{
-				Text: fmt.Sprintf("Choose %d", i+1),
-				CallbackData: pointer.Of(marshalCallbackData(CallbackData{
-					Action: actionChooseTheme,
-					ThemeC: &ThemeChoose{
-						ID: theme.ID,
-					},
-				})),
-				SwitchInlineQueryCurrentChat: pointer.Of(fmt.Sprintf("%s", theme.Question)),
-			},
+		response.WriteString(fmt.Sprintf("%s: %s\n", numbers[i], theme.Question))
+		button = append(button, tgbotapi.InlineKeyboardButton{
+			Text: fmt.Sprintf("Choose %s", numbers[i]),
+			CallbackData: pointer.Of(marshalCallbackData(CallbackData{
+				Action: actionChooseTheme,
+				ThemeC: &ThemeChoose{
+					ID: theme.ID,
+				},
+			})),
+			SwitchInlineQueryCurrentChat: pointer.Of(fmt.Sprintf("%s", theme.Question)),
 		})
+		if len(button) == 2 {
+			buttons = append(buttons, button)
+			button = make([]tgbotapi.InlineKeyboardButton, 0, 2)
+		}
 	}
 
 	return tgbotapi.NewInlineKeyboardMarkup(
