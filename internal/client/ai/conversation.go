@@ -22,15 +22,18 @@ type (
 
 const (
 	dialogPrompt = `
-Text to answer: %s
+Using the following text as context: %s
 
-Please provide response format with json(without any extra text, without formatting, only raw json, without newlines)
-Here is an example of a response:
+Generate a response in %s according to the context of the previous text, questions, and answers.
+
+Respond only with a raw, valid JSON object. Do not include any extra text, explanations, or formatting.
+
+Response format example:
 {
-"answer": text to continue dialog
+  "answer": "text"
 }
 
-Generate response in %s and according to the previous question and answers.
+Replace "text" with the actual answer.
 `
 )
 
