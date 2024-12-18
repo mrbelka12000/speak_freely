@@ -67,7 +67,7 @@ WHERE id = $1`,
 
 func (t *theme) List(ctx context.Context, pars models.ThemeListPars) ([]models.Theme, int, error) {
 	querySelect := `
-   SELECT DISTINCT ON (question)
+   SELECT
 	id,
 	level,
 	topic_id,
