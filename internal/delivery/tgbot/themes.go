@@ -40,6 +40,7 @@ func (h *Handler) getThemes(externalID int64) (empty tgbotapi.InlineKeyboardMark
 			Limit: 10,
 			Page:  1,
 		},
+		Random: true,
 	})
 	if err != nil {
 		return empty, "", fmt.Errorf("get themes: %w", err)
