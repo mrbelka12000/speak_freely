@@ -34,6 +34,7 @@ Response format example:
 }
 
 Replace "text" with the actual answer.
+Don't paste JSON in answer. Always give only raw text
 `
 )
 
