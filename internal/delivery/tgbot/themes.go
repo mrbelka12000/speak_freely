@@ -57,7 +57,6 @@ func (h *Handler) getThemes(externalID int64) (empty tgbotapi.InlineKeyboardMark
 	buttons := make([][]tgbotapi.InlineKeyboardButton, 0, count)
 	button := make([]tgbotapi.InlineKeyboardButton, 0, 2)
 	for i, theme := range themes {
-
 		response.WriteString(fmt.Sprintf("%s: %s\n", numbers[i], theme.Question))
 		button = append(button, tgbotapi.InlineKeyboardButton{
 			Text: fmt.Sprintf("Choose %s", numbers[i]),

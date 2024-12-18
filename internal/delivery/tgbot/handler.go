@@ -262,6 +262,7 @@ func (h *Handler) handleCommands(ctx context.Context, msg *tgbotapi.Message) (st
 
 		tMarkup, text, err := h.getThemes(msg.From.ID)
 		if err != nil {
+			h.log.With("error", err).Error("get themes")
 			return lsb.GetNothingFindMessage(language), nil
 		}
 
