@@ -65,6 +65,7 @@ type (
 
 const (
 	defaultTimeout = 30 * time.Second
+	defaultLevel   = "B1"
 
 	apiURL          = "https://api.openai.com"
 	pathCompletions = "/v1/chat/completions"
@@ -170,4 +171,11 @@ func (c *Client) do(ctx context.Context, in, out any) (err error) {
 	}
 
 	return nil
+}
+
+func unEmpty(a, b string) string {
+	if a == "" {
+		return b
+	}
+	return b
 }

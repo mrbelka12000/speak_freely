@@ -10,6 +10,7 @@ type (
 	DialogRequest struct {
 		Text     string
 		Language string
+		Level    string
 
 		Questions []string
 		Answers   []string
@@ -35,6 +36,7 @@ Response format example:
 
 Replace "text" with the actual answer.
 Don't paste JSON in answer. Always give only raw text
+Generate response according to level of student %s
 `
 )
 
@@ -61,7 +63,7 @@ func (c *Client) Dialog(ctx context.Context, req DialogRequest) (obj DialogRespo
 
 	msg = append(msg, Message{
 		Role:    "user",
-		Content: fmt.Sprintf(dialogPrompt, req.Text, req.Language),
+		Content: fmt.Sprintf(dialogPrompt, req.Text, req.Language, unEmpty(req.Level, defaultLevel)),
 	})
 
 	err = c.do(ctx,

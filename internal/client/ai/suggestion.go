@@ -12,6 +12,7 @@ type (
 		Topic    string
 		Question string
 		Language string
+		Level    string
 	}
 
 	SuggestionResponse struct {
@@ -41,6 +42,7 @@ Here is an example of a response:
 
 Do not provide hints like this "Add a comma after 'Also'."
 Generate response in %s
+Generate response according to level of student %s
 `
 )
 
@@ -54,7 +56,7 @@ func (c *Client) GetSuggestions(ctx context.Context, req SuggestionRequest) (obj
 			Messages: []Message{
 				{
 					Role:    "user",
-					Content: fmt.Sprintf(suggestionPrompt, req.Text, req.Topic, req.Question, req.Language),
+					Content: fmt.Sprintf(suggestionPrompt, req.Text, req.Topic, req.Question, req.Language, unEmpty(req.Level, defaultLevel)),
 				},
 			},
 		},
