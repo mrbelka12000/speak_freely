@@ -11,6 +11,7 @@ type (
 		Payed         bool   `json:"payed"`
 		RemainingTime int64  `json:"remaining_time"`
 		IsRedeemUsed  bool   `json:"used_redeem"`
+		IsStarted     bool   `json:"started"`
 
 		Language *Language `json:"first_language,omitempty"`
 	}
@@ -28,6 +29,7 @@ type (
 		RemainingTime *int64  `json:"remaining_time"`
 		Payed         *bool   `json:"payed"`
 		IsRedeemUsed  *bool   `json:"used_redeem"`
+		IsStarted     *bool   `json:"started"`
 		CreatedAt     int64   `json:"created_at"`
 	}
 

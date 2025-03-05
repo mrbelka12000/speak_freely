@@ -80,7 +80,7 @@ func (c *Cron) checkSubscriptionExpiration() {
 			err = c.uc.BillingInfoUpdate(context.Background(),
 				bi.ID,
 				models.BillingInfoCU{
-					DebitDate: pointer.Of(time.Now().AddDate(0, 0, 1)),
+					DebitDate: pointer.Of(time.Now().AddDate(0, 1, 1)),
 				},
 			)
 			if err != nil {

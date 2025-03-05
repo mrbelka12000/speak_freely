@@ -2,6 +2,8 @@ package tgbot
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"log/slog"
 	"strings"
@@ -65,8 +67,44 @@ func Start(cfg config.Config, uc *usecase.UseCase, log *slog.Logger, cache cache
 
 func (h *Handler) handleUpdate() {
 	for update := range h.ch {
-		ctx, _ := context.WithTimeout(context.Background(), 2*time.Minute)
 
+		ctx, _ := context.WithTimeout(context.Background(), 2*time.Minute)
+		if update.Message != nil && update.Message.From != nil {
+			user, err := h.uc.UserGet(ctx, models.UserGetPars{
+				ExternalID: fmt.Sprint(update.Message.From.ID),
+			})
+			if err != nil {
+				if errors.Is(err, sql.ErrNoRows) {
+					h.handleSendMessageError(
+						h.bot.Send(tgbotapi.NewMessage(
+							update.Message.Chat.ID,
+							"Press /start command"),
+						),
+					)
+					continue
+				}
+			}
+
+			if !user.IsStarted {
+				err = h.uc.UserUpdate(ctx,
+					models.UserGetPars{
+						ExternalID: fmt.Sprint(update.Message.From.ID),
+					},
+					models.UserCU{
+						IsStarted: pointer.Of(true),
+					},
+				)
+				if err != nil {
+					h.log.With("error", err).Error("failed to update user")
+				}
+				h.handleSendMessageError(
+					h.bot.Send(tgbotapi.NewMessage(
+						update.Message.Chat.ID,
+						"Press /start command"),
+					),
+				)
+			}
+		}
 		if update.CallbackQuery != nil {
 			h.handleCallbacks(ctx, update.CallbackQuery)
 			h.handleSendMessageError(h.bot.Send(

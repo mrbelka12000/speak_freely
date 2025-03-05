@@ -206,6 +206,11 @@ SET
 		queryUpdate += fmt.Sprintf(" is_redeem_used = $%v ,", len(args))
 	}
 
+	if user.IsStarted != nil {
+		args = append(args, *user.IsStarted)
+		queryUpdate += fmt.Sprintf(" is_started = $%v ,", len(args))
+	}
+
 	queryUpdate = queryUpdate[:len(queryUpdate)-1]
 
 	_, err := Exec(ctx, u.db, queryUpdate+queryWhere, args...)

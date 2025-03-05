@@ -47,8 +47,7 @@ type (
 	}
 
 	RedisConfig struct {
-		RedisAddr     string `env:"REDIS_ADDR,required"`
-		RedisPassword string `env:"REDIS_PASSWORD,required"`
+		RedisAddr string `env:"REDIS_ADDR,required"`
 	}
 
 	MinIOConfig struct {
