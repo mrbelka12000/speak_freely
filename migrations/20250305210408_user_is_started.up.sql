@@ -1,5 +1,0 @@
-BEGIN;
-
-ALTER TABLE users ADD COLUMN IF NOT EXISTS is_started boolean DEFAULT false;
-
-COMMIT;
