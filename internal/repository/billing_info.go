@@ -43,6 +43,10 @@ SET
 		args = append(args, *pars.DebitDate)
 		queryUpdate += fmt.Sprintf(" debit_date = $%v ,", len(args))
 	}
+	if pars.IsNotified != nil {
+		args = append(args, *pars.IsNotified)
+		queryUpdate += fmt.Sprintf(" is_notified = $%v ,", len(args))
+	}
 
 	queryUpdate = queryUpdate[:len(queryUpdate)-1]
 

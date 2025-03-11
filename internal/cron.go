@@ -70,21 +70,14 @@ func (c *Cron) checkSubscriptionExpiration() {
 	}
 
 	for _, bi := range billingInfos {
+		if bi.IsNotified {
+			continue
+		}
+
 		if bi.DebitDate.Before(time.Now()) {
 			err := c.notifier.NotifyTimeToPay(bi.UserID, bi.ChatID)
 			if err != nil {
 				c.log.With("error", err).Error("failed to notify time to pay")
-				continue
-			}
-
-			err = c.uc.BillingInfoUpdate(context.Background(),
-				bi.ID,
-				models.BillingInfoCU{
-					DebitDate: pointer.Of(time.Now().AddDate(0, 1, 1)),
-				},
-			)
-			if err != nil {
-				c.log.With("error", err).Error("failed to update billing info")
 				continue
 			}
 
@@ -99,6 +92,19 @@ func (c *Cron) checkSubscriptionExpiration() {
 			)
 			if err != nil {
 				c.log.With("error", err).Error("failed to update user subscription")
+				continue
+			}
+
+			err = c.uc.BillingInfoUpdate(context.Background(),
+				bi.ID,
+				models.BillingInfoCU{
+					IsNotified: pointer.Of(false),
+					DebitDate:  pointer.Of(time.Now().AddDate(0, 1, 0)),
+				},
+			)
+			if err != nil {
+				c.log.With("error", err).Error("failed to update billing info")
+				continue
 			}
 		}
 	}
