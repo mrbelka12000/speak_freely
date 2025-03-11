@@ -11,7 +11,7 @@ The **Speak Freely Bot** is designed to help users practice speaking foreign lan
 - Pronunciation feedback: Provides constructive feedback on pronunciation.
 
 ## Usage
-- Start a conversation by saying "Hello".
+- Start a conversation by sending "/start".
 - The bot responds with a question or prompt to continue the conversation.
 - Choose language to practice.
 - Users reply using their voice.
