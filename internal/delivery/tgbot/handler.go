@@ -2,8 +2,6 @@ package tgbot
 
 import (
 	"context"
-	"database/sql"
-	"errors"
 	"fmt"
 	"log/slog"
 	"strings"
@@ -69,38 +67,7 @@ func (h *Handler) handleUpdate() {
 	for update := range h.ch {
 
 		ctx, _ := context.WithTimeout(context.Background(), 2*time.Minute)
-		if update.Message != nil && update.Message.From != nil {
-			_, err := h.uc.UserGet(ctx, models.UserGetPars{
-				ExternalID: fmt.Sprint(update.Message.From.ID),
-			})
-			if err != nil {
-				if errors.Is(err, sql.ErrNoRows) {
-					obj := models.UserCU{
-						Nickname:   pointer.Of(update.Message.From.UserName),
-						LanguageID: pointer.Of(int64(1)),
-						ExternalID: pointer.Of(fmt.Sprint(update.Message.From.ID)),
-					}
 
-					_, _, err = h.uc.UserCreate(ctx, obj)
-					if err != nil {
-						h.log.With("error", err).Error("create user")
-						continue
-					}
-
-					toSendMsg := tgbotapi.NewMessage(update.Message.Chat.ID, "Which language do you want to learn?")
-
-					lMarkup, err := h.getLanguages()
-					if err != nil {
-						h.log.With("error", err).Error("get languages")
-						continue
-					}
-
-					toSendMsg.ReplyMarkup = lMarkup
-					h.handleSendMessageError(h.bot.Send(toSendMsg))
-					continue
-				}
-			}
-		}
 		if update.CallbackQuery != nil {
 			h.handleCallbacks(ctx, update.CallbackQuery)
 			h.handleSendMessageError(h.bot.Send(
