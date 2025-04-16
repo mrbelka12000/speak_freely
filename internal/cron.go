@@ -98,7 +98,7 @@ func (c *Cron) checkSubscriptionExpiration() {
 			err = c.uc.BillingInfoUpdate(context.Background(),
 				bi.ID,
 				models.BillingInfoCU{
-					IsNotified: pointer.Of(false),
+					IsNotified: pointer.Of(true),
 					DebitDate:  pointer.Of(time.Now().AddDate(0, 1, 0)),
 				},
 			)
