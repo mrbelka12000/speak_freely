@@ -12,8 +12,8 @@ jobs:
     env:
       IMAGE: speak_freely
       IMAGE_TEST: speak_freely_test
-      SERVICE_NAME: speak_freely_service
-      TEST_SERVICE_NAME: speak_freely_service_test
+      SERVICE_NAME: speak_freely
+      TEST_SERVICE_NAME: speak_freely
 
     outputs:
       image: ${{ steps.define_env.outputs.image }}
